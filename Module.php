@@ -62,8 +62,8 @@ class Module implements DependencyIndicatorInterface
         $eventManager = $e->getApplication()->getEventManager();
         $services     = $e->getApplication()->getServiceManager();
         $sharedManager = $eventManager->getSharedManager();
-        $defaultlistener = $services->get('Jobs/Xing');
-        $defaultlistener->attachShared($sharedManager);
+        //$defaultlistener = $services->get('Jobs/Xing');
+        //$defaultlistener->attachShared($sharedManager);
 
     }
 }
