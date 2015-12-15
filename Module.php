@@ -59,11 +59,10 @@ class Module implements DependencyIndicatorInterface
      */
     public function onBootstrap(MvcEvent $e)
     {
-        $eventManager = $e->getApplication()->getEventManager();
         $services     = $e->getApplication()->getServiceManager();
-        $sharedManager = $eventManager->getSharedManager();
-        //$defaultlistener = $services->get('Jobs/Xing');
-        //$defaultlistener->attachShared($sharedManager);
+        $jobEvents = $services->get('Jobs/Events');
+        $publishListener = $services->get('YawikXingVendorApi/Listener');
 
+        $publishListener->attach($jobEvents);
     }
 }

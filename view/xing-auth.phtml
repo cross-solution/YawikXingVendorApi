@@ -1,0 +1,51 @@
+<?php
+/**
+ * YAWIK
+ *
+ * @filesource
+ * @license MIT
+ * @copyright  2013 - 2015 Cross Solution <http://cross-solution.de>
+ * @author Mathias Gelhausen <gelhausen@cross-solution.de>
+ */
+
+if ('enable' == $this->do):
+?>
+<script type="text/javascript">
+    jQuery(function() {
+        window.opener.$(window.opener.document).trigger('fetch_complete.xing-auth.xing-vendor-api');
+    });
+
+</script>
+<?php
+return;
+endif;
+
+$this->headTitle('Xing Vendor API');
+$this->headscript()->appendFile($this->basePath('YawikXingVendorApi/js/xing-auth.js'));
+?>
+
+<h1>Xing Vendor API</h1>
+
+<p>
+<?php
+    $user = $this->auth()->getUser();
+    $xingSession = $user->getAuthSession('XingVendorApi');
+
+    if (empty($xingSession)) {
+        $btnId    = 'xing-auth-enable-link';
+        $btnClass = 'btn btn-success';
+        $text     = /* @translate */ 'Enable API';
+        $href     = '?do=enable';
+        echo $this->translate('To be able to use the Xing Vendor API to push jobs, you need to authenticate once to open a session.', 'YawikXingVendorApi');
+
+} else {
+        $btnId    = 'xing-auth-disable-link';
+        $btnClass = 'btn btn-danger';
+        $text     = /* @translate */ 'Disable API';
+        $href     = '?do=disable';
+        echo $this->translate('There is a session available. If pushing jobs does not work because the session expired by XING, disable and enable the API session here.', 'YawikXingVendorApi');
+    }
+?>
+</p><p><a id="<?php echo $btnId?>" class="<?php echo $btnClass ?>"
+      href="<?php echo $href ?>"><?php echo $this->translate($text, 'YawikXingVendorApi'); ?></a></p>
+  

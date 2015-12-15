@@ -1,0 +1,50 @@
+<?php
+/**
+ * YAWIK
+ *
+ * @filesource
+ * @license MIT
+ * @copyright  2013 - 2015 Cross Solution <http://cross-solution.de>
+ */
+
+$options = [
+
+    /*
+     * Set the verbosity level of the log.
+     *
+     * Each higher level includes all of the lower levels.
+     *
+     * FALSE: disabled
+     *
+     * 0; EMERG (very rarely used)
+     * 1: ALERT (very rarely used)
+     * 2: CRIT
+     * 3: ERR
+     * 4: WARN
+     * 5: NOTICE
+     * 6: INFO
+     * 7: DEBUG
+     */
+//    'log_level' => false,
+
+     /*
+      * Login name of the user, who is used for XING authentication.
+      */
+    'authorized_user' => '',
+
+    /*
+     * the preview indicates, that a job is not shown
+     */
+//    'api_preview' => true,
+
+    /*
+     * XING order id. (968180 is for the sandbox)
+     */
+//    'order_id' => 968180,
+];
+
+
+/*
+ * Do not change below this line
+ */
+return [ 'options' => [ 'YawikXingVendorApi/ModuleOptions' => [ 'options' => $options ] ] ];
