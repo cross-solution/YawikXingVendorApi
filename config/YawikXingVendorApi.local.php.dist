@@ -1,0 +1,16 @@
+<?php
+/**
+ * YAWIK
+ *
+ * @filesource
+ * @license MIT
+ * @copyright  2013 - 2015 Cross Solution <http://cross-solution.de>
+ */
+
+return array(
+    'YawikXingVendorApi' => array(
+
+        /* Login name of the authorized user (whom XING account is used to push jobs.) */
+        'authorized_user' => ''
+    ),
+);

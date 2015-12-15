@@ -13,7 +13,7 @@ namespace YawikXingVendorApi\Factory\Listener;
 use YawikXingVendorApi\Listener\Publisher;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
-use YawikXingVendorApi\Options\ListenerPublisherOptions;
+
 
 /**
  * Class RegisterFactory
@@ -31,13 +31,31 @@ class PublisherFactory implements FactoryInterface
      */
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
-        $config = $serviceLocator->get('Config');
-        $configJobPosterXing = array();
-        if (array_key_exists('JobPoster', $config) && array_key_exists('XING', $config['JobPoster'])) {
-            $configJobPosterXing = $config['JobPoster']['XING'];
-        }
-        $options = new ListenerPublisherOptions($configJobPosterXing);
+        /* @var $options \YawikXingVendorApi\Options\ModuleOptions */
+        $options = $serviceLocator->get('YawikXingVendorApi/ModuleOptions');
 
-        return new Publisher($options);
+        $createWorkercallback = function() use ($serviceLocator) {
+            $worker = $serviceLocator->get('YawikXingVendorApi/Listener/PublisherWorker');
+
+            return $worker;
+        };
+
+        $publisher = new Publisher($createWorkercallback);
+
+        $logLevel = $options->getLogLevel();
+
+        if (false !== $logLevel) {
+            $log = $serviceLocator->get('Log/YawikXingVendorApi/Publisher');
+
+            if (7 != $logLevel) {
+                foreach ($log->getWriters() as $writer) {
+                    $writer->addFilter($logLevel);
+                }
+            }
+
+            $publisher->setLogger($log);
+        }
+
+        return $publisher;
     }
 }

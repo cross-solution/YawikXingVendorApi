@@ -10,16 +10,15 @@
 
 namespace YawikXingVendorApi\Service;
 
+use Zend\Log\LoggerAwareTrait;
+
 /**
  * Class CategoryJob
  * @package YawikXingVendorApi\Service
  */
 class CategoryJob
 {
-    /**
-     * @var
-     */
-    protected $logger;
+    use LoggerAwareTrait;
 
     /**
      * @var array
@@ -488,16 +487,10 @@ class CategoryJob
         'JOBLEVEL_6' => array('en' => 'Senior Executive / CEO / CFO / President)'),
     );
 
-    public function setLogger($logger)
-    {
-        $this->logger = $logger;
-        return $this;
-    }
-
-    protected function info($message)
+    protected function log($message, $type = 'info')
     {
         if (isset($this->logger)) {
-            $this->logger->info($message);
+            $this->logger->{$type}('----> ' . $message);
         }
         return $this;
     }
@@ -551,7 +544,7 @@ class CategoryJob
         if (!empty($code)) {
             return $code;
         }
-        $this->info('[xing-category] not found: ' . var_export($label, True));
+        $this->log('No xing category found for: ' . var_export($label, True) . '; Using "Not categorized"', 'warn');
         return '1';
     }
 
@@ -571,7 +564,7 @@ class CategoryJob
         if (!empty($code)) {
             return $code;
         }
-        $this->info('[xing-jobtype] not found: ' . var_export($label, True));
+        $this->log('No xing jobtype found for: ' . var_export($label, True) . '; Using "FULL_TIME"', 'warn');
         return 'FULL_TIME';
     }
 
