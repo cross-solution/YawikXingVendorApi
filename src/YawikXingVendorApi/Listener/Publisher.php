@@ -20,7 +20,6 @@ use Zend\Log\LoggerAwareTrait;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
-// use
 
 /**
  * Job listener for triggering actions like sending mail notification
@@ -32,7 +31,14 @@ class Publisher implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
+    /**
+     * @var string
+     */
     protected $name = 'XingVendorApi';
+
+    /**
+     * @var
+     */
     protected $createWorkerCallback;
 
     public function __construct($createWorkerCallback)
@@ -50,6 +56,11 @@ class Publisher implements LoggerAwareInterface
         return $this->name;
     }
 
+    /**
+     * @param JobEvent $event
+     *
+     * @return JobResponse
+     */
     public function postJob(JobEvent $event)
     {
         $logger = $this->getLogger();
