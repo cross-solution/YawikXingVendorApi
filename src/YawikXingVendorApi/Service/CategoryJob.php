@@ -558,6 +558,11 @@ class CategoryJob
     }
 
 
+    /**
+     * @param $label
+     *
+     * @return null|string
+     */
     public function getJobType($label)
     {
         $code = $this->find($label, $this->job_type);
@@ -568,6 +573,11 @@ class CategoryJob
         return 'FULL_TIME';
     }
 
+    /**
+     * @param $label
+     *
+     * @return string
+     */
     public function getJobLevel($label)
     {
         return 'JOBLEVEL_2';

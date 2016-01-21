@@ -174,7 +174,7 @@ class PublisherWorker implements LoggerAwareInterface
          * The description of the posting. Should be text only but allows html for certain orders.
          * MAX 10000 characters.
          */
-        $parameter['description'] = isset($extra['description']) ? $extra['description'] : $job->getTemplateValues()->description;
+        $parameter['description'] = file_get_contents('http://www.jobsintown.de/job/385/154549.html'); #isset($extra['description']) ? $extra['description'] : $job->getTemplateValues()->description;
 
         /*
          * function (required)
@@ -357,7 +357,7 @@ class PublisherWorker implements LoggerAwareInterface
          * If your order allows to have your posting hosted on an external site, you can
          * set here the url. It should be a http address.
          */
-        //$parameter['posting_url'] = 'http://example.de/job.html';
+        $parameter['posting_url'] = 'https://www.jobsintown.de/job/385/154549.html';
 
         /*
          * publish_to_company (optional)

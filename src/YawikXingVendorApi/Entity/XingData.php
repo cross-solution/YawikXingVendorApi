@@ -20,13 +20,12 @@ class XingData
 {
     /**
      * @var string
-     *
      */
-    protected $categoryId;
     protected $city;
     protected $companyName;
     protected $country;
     protected $description;
+    protected $disciplineId;
     protected $function;
     protected $industry;
     protected $jobType;
@@ -37,26 +36,6 @@ class XingData
     protected $pointOfContactType;
     protected $tags;
     protected $userRole;
-
-    /**
-     * @param string $categoryId
-     *
-     * @return self
-     */
-    public function setCategoryId($categoryId)
-    {
-        $this->categoryId = $categoryId;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCategoryId()
-    {
-        return $this->categoryId;
-    }
 
     /**
      * @param mixed $city
@@ -117,6 +96,27 @@ class XingData
     {
         return $this->country;
     }
+
+    /**
+     * @param string $disciplineId
+     *
+     * @return self
+     */
+    public function setDisciplineId($disciplineId)
+    {
+        $this->disciplineId = $disciplineId;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDisciplineId()
+    {
+        return $this->disciplineId;
+    }
+
 
     /**
      * @param mixed $description
