@@ -136,10 +136,16 @@ class PublisherWorker implements LoggerAwareInterface
             $categoryJob->setLogger($this->getLogger());
             $logger->info('--> Collating data ...');
         }
+
+        $xingData = isset($extra['channels']['XingVendorApi']['xing'])
+                  ? $extra['channels']['XingVendorApi']['xing']
+                  : array('company' => '', 'personal' => '');
+
         $parameter = array();
         // check for category_id (required) and subcategory_id (optional)
 #        $parameter['category_id'] = $categoryJob->getCategory(isset($extra['branches']) ? $extra['branches'] : []);
         // check for city (required)
+
 
         /*
          * city (required)
@@ -174,7 +180,10 @@ class PublisherWorker implements LoggerAwareInterface
          * The description of the posting. Should be text only but allows html for certain orders.
          * MAX 10000 characters.
          */
-        $parameter['description'] = file_get_contents('http://www.jobsintown.de/job/385/154549.html'); #isset($extra['description']) ? $extra['description'] : $job->getTemplateValues()->description;
+
+        $parameter['description'] = empty($extra['description'])
+                                  ? @file_get_contents($job->getLink())
+                                  : '';
 
         /*
          * function (required)
@@ -240,7 +249,7 @@ class PublisherWorker implements LoggerAwareInterface
          * This is a unique ID for your organization that is provided to you by XING. All
          * orders belong to that organization.
          */
-        $parameter['organization_id'] = 5160;//$job->getOrganization()->getId();
+        $parameter['organization_id'] = $options->getOrganizationId();
 
         /*
          * point_of_contact_type (required)
@@ -296,7 +305,7 @@ class PublisherWorker implements LoggerAwareInterface
          * contact for this posting the field should contain the url to the Company
          * profile on XING. For example https://www.xing.com/company/xing
          */
-        $parameter['company_profile_url'] = 'EMPLOYEE';
+        $parameter['company_profile_url'] = $xingData['company'];
 
         /*
          * create_story_on_activation (optional)
@@ -333,7 +342,7 @@ class PublisherWorker implements LoggerAwareInterface
          * this posting the field should contain the url to the profile on XING.
          * For example https://www.xing.com/profiles/Max_Mustermann
          */
-        $parameter['poster_url'] = 'https://www.xing.com/profile/Carsten_Bleek'; #$job->getContactEmail();
+        $parameter['poster_url'] = $xingData['personal'];
 
         /*
          * posting_logo_content (optional)
@@ -357,7 +366,7 @@ class PublisherWorker implements LoggerAwareInterface
          * If your order allows to have your posting hosted on an external site, you can
          * set here the url. It should be a http address.
          */
-        $parameter['posting_url'] = 'https://www.jobsintown.de/job/385/154549.html';
+        $parameter['posting_url'] = $job->getLink();
 
         /*
          * publish_to_company (optional)
@@ -442,7 +451,7 @@ class PublisherWorker implements LoggerAwareInterface
          *
          * Part of the address of the Job-Posting - zipcode.*
          */
-        $parameter['zip_code'] = '60486';
+        //$parameter['zip_code'] = '60486';
 
         return $parameter;
     }

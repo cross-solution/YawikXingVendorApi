@@ -41,6 +41,11 @@ $options = [
      * XING order id. (968180 is for the sandbox)
      */
 //    'order_id' => 968180,
+
+    /*
+     * XING organization id
+     *
+//    'organization_id' => '',
 ];
 
 
