@@ -61,6 +61,13 @@ class ModuleOptions extends AbstractOptions
     protected $orderId = 968180;
 
     /**
+     * Xing organization id
+     *
+     * @var int
+     */
+    protected $organizationId;
+
+    /**
      * Sets the API Preview flag.
      *
      * @param boolean $apiPreview
@@ -162,5 +169,29 @@ class ModuleOptions extends AbstractOptions
     public function getOrderId()
     {
         return $this->orderId;
+    }
+
+    /**
+     * Sets the Xing organization id.
+     *
+     * @param int $organizationId
+     *
+     * @return self
+     */
+    public function setOrganizationId($organizationId)
+    {
+        $this->organizationId = $organizationId;
+
+        return $this;
+    }
+
+    /**
+     * Gets the Xing organization id
+     *
+     * @return int
+     */
+    public function getOrganizationId()
+    {
+        return $this->organizationId;
     }
 }
