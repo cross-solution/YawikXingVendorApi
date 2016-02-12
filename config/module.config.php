@@ -10,6 +10,16 @@
 
 return array(
 
+    'doctrine' => array(
+        'driver' => array(
+            'odm_default' => array(
+                'drivers' => array(
+                    'YawikXingVendorApi\Entity' => 'annotation',
+                ),
+            ),
+        ),
+    ),
+
     'hybridauth' => [
         'XingVendorApi' => [
             'enabled' => 'true',
