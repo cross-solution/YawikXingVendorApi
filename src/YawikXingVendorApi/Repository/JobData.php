@@ -11,7 +11,7 @@ namespace YawikXingVendorApi\Repository;
 use Core\Repository\AbstractRepository;
 use Core\Repository\DoctrineMongoODM\PaginatorAdapter;
 
-class XingJobResponse extends AbstractRepository
+class JobData extends AbstractRepository
 {
     /**
      * Gets a pagination cursor to the XingJobResponse collection
@@ -25,5 +25,23 @@ class XingJobResponse extends AbstractRepository
         /* @var $filter \Core\Repository\Filter\AbstractPaginationQuery  */
         $qb = $filter->filter($params, $this->createQueryBuilder());
         return $qb->getQuery()->execute();
+    }
+
+    /**
+     *
+     *
+     * @param $jobId
+     *
+     * @return \YawikXingVendorApi\Entity\JobData
+     */
+    public function findOrCreate($jobId)
+    {
+        $data = $this->findOneBy([ 'jobId' => (string) $jobId ]);
+
+        if (!$data) {
+            $data = $this->create([ 'jobId' => (string) $jobId ]);
+        }
+
+        return $data;
     }
 }

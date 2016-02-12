@@ -38,6 +38,20 @@ class PublisherWorkerFactory implements FactoryInterface
 
         $worker = new PublisherWorker($hybridAuth, $user, $options);
 
+        $logLevel = $options->getLogLevel();
+
+        if (false !== $logLevel) {
+            $log = $serviceLocator->get('Log/YawikXingVendorApi/Publisher');
+
+            if (7 != $logLevel) {
+                foreach ($log->getWriters() as $writer) {
+                    $writer->addFilter($logLevel);
+                }
+            }
+
+            $worker->setLogger($log);
+        }
+
         return $worker;
     }
 }

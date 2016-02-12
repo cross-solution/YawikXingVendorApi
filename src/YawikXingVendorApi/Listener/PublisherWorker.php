@@ -46,6 +46,13 @@ class PublisherWorker implements LoggerAwareInterface
      */
     protected $options;
 
+    /**
+     *
+     *
+     * @var \YawikXingVendorApi\Repository\JobData
+     */
+    protected $repository;
+
     public function __construct($hybridAuth, $authorizedUser, $options)
     {
         $this->hybridAuth = $hybridAuth;
@@ -95,13 +102,16 @@ class PublisherWorker implements LoggerAwareInterface
         //$body = Json::encode($data);
         //$response = $api->post($baseUrl . 'vendor/jobs/postings', $data, null, null, /*multipart*/ true);
 
-
+        $jobData = $this->repository->findOrCreate($job->getId());
         $logger && $logger->info('--> Sending ...');
         $consumerKeys = $adapter->config['keys'];
         $tokens      = $adapter->getAccessToken();
         $response = $this->sendJob($data, $consumerKeys, $tokens);
         //$client = new XingClient();
         //$response = $client->sendJob($data, $consumerKeys, $tokens);
+
+        $jobData->addResponse($response['code'], $response['body']);
+        $this->repository->store($jobData);
 
         switch($response['code']){
             case 200:
@@ -181,9 +191,16 @@ class PublisherWorker implements LoggerAwareInterface
          * MAX 10000 characters.
          */
 
-        $parameter['description'] = empty($extra['description'])
-                                  ? @file_get_contents($job->getLink())
-                                  : '';
+        $logger->info('---> Fetch description from ' . $job->getLink());
+        $description = @file_get_contents($job->getLink());
+
+        if (!$description) {
+            $description = $extra['description'];
+
+            $logger->notice('----> No description recieved. Fall back to transmitted description.');
+        }
+
+        $parameter['description'] = $description ?: $extra['description'];
 
         /*
          * function (required)

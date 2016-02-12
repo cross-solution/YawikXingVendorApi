@@ -10,7 +10,7 @@
 
 namespace YawikXingVendorApi\Options;
 
-use YawikXingVendorApi\Options\ListenerPublisherOptions as Options;
+use YawikXingVendorApi\Options\ModuleOptions as Options;
 
 class YawikXingVendorApi extends \PHPUnit_Framework_TestCase
 {
@@ -53,8 +53,21 @@ class YawikXingVendorApi extends \PHPUnit_Framework_TestCase
      */
     public function testSetGetOrganizationId()
     {
-        $this->assertEquals(5160, $this->options->getOrganizationId());
+        $this->assertEquals(null, $this->options->getOrganizationId());
         $this->options->setOrganizationId(7);
         $this->assertEquals(7, $this->options->getOrganizationId());
+    }
+
+    public function testSetGetLoglevel()
+    {
+        $this->assertFalse($this->options->getLogLevel());
+        $this->options->setLogLevel(2);
+        $this->assertEquals(2, $this->options->getLogLevel());
+        $this->options->setLogLevel('2');
+        $this->assertEquals(2, $this->options->getLogLevel());
+        $this->options->setLogLevel(18);
+        $this->assertEquals(7, $this->options->getLogLevel());
+        $this->options->setLogLevel('not2Num');
+        $this->assertFalse($this->options->getLogLevel());
     }
 }

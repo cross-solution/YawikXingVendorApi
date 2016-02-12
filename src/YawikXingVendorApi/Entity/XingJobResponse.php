@@ -11,51 +11,66 @@
 namespace YawikXingVendorApi\Entity;
 
 
-use Core\Entity\AbstractIdentifiableModificationDateAwareEntity as BaseEntity;
+use Core\Entity\AbstractEntity;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 
 /**
- * Entity for saving Xing responses of the vendor API
+ * Entity for Xing responses of the vendor API
  *
  * @see https://dev.xing.com/docs/post/vendor/jobs/postings
  * @author Carsten Bleek <bleek@cross-solution.de>
+ * @author Mathias Gelhausen <gelhausen@cross-solution.de>
  *
- * @ODM\Document(collection="XingJobResponse", repositoryClass="YawikXingVendorApi\Repository\XingJobResponse")
+ * @ODM\EmbeddedDocument
  */
-class XingJobResponse extends BaseEntity implements XingJobResponseInterface
+class XingJobResponse extends AbstractEntity implements XingJobResponseInterface
 {
+
     /**
-     * @ODM\String
-     * @var string
+     * Creation date.
+     *
+     * @var \DateTime
+     * @ODM\Field(type="tz_date")
      */
-    protected $postingId;
+    protected $date;
+
+    /**
+     * @ODM\Integer
+     *
+     * @var int
+     */
+    protected $code;
 
     /**
      * @ODM\String
-     * @var string
-     */
-    protected $permalink;
-
-    /**
-     * @ODM\String
-     * @var string Response Message
-     */
-    protected $message;
-
-    /**
-     * @ODM\String
+     *
      * @var
      */
-    protected $externalId;
+    protected $body;
+
+    public function __construct()
+    {
+        $this->date = new \DateTime('now');
+
+        $args = func_get_args();
+
+        if (isset($args[0])) {
+            $this->setCode($args[0]);
+        }
+
+        if (isset($args[1])) {
+            $this->setBody($args[1]);
+        }
+    }
 
     /**
-     * @param mixed $postingId
+     * @param mixed $body
      *
      * @return self
      */
-    public function setPostingId($postingId)
+    public function setBody($body)
     {
-        $this->postingId = $postingId;
+        $this->body = $body;
 
         return $this;
     }
@@ -63,68 +78,38 @@ class XingJobResponse extends BaseEntity implements XingJobResponseInterface
     /**
      * @return mixed
      */
-    public function getPostingId()
+    public function getBody()
     {
-        return $this->postingId;
+        return $this->body;
     }
 
     /**
-     * @param mixed $permalink
+     * @param int $code
      *
      * @return self
      */
-    public function setPermalink($permalink)
+    public function setCode($code)
     {
-        $this->postingId = $permalink;
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getPermalink()
-    {
-        return $this->permalink;
-    }
-
-
-    /**
-     * @param mixed $message
-     *
-     * @return self
-     */
-    public function setMessage($message)
-    {
-        $this->message = $message;
+        $this->code = $code;
 
         return $this;
     }
 
     /**
-     * @return mixed
+     * @return int
      */
-    public function getMessage()
+    public function getCode()
     {
-        return $this->message;
+        return $this->code;
     }
 
     /**
-     * @param mixed $externalId
-     *
-     * @return self
+     * @return \DateTime
      */
-    public function setExternalId($externalId)
+    public function getDate()
     {
-        $this->externalId = $externalId;
-
-        return $this;
+        return $this->date;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getExternalId()
-    {
-        return $this->externalId;
-    }
+
 }
