@@ -35,8 +35,10 @@ class PublisherWorkerFactory implements FactoryInterface
         $hybridAuth = $serviceLocator->get('HybridAuth');
         $users = $serviceLocator->get('repositories')->get('Auth/User');
         $user = $users->findByLogin($options->getAuthorizedUser());
+        $repositories = $serviceLocator->get('repositories');
+        $repository   = $repositories->get('YawikXingVendorApi/JobData');
 
-        $worker = new PublisherWorker($hybridAuth, $user, $options);
+        $worker = new PublisherWorker($hybridAuth, $user, $options, $repository);
 
         $logLevel = $options->getLogLevel();
 

@@ -53,12 +53,14 @@ class PublisherWorker implements LoggerAwareInterface
      */
     protected $repository;
 
-    public function __construct($hybridAuth, $authorizedUser, $options)
+    public function __construct($hybridAuth, $authorizedUser, $options, $repository)
     {
         $this->hybridAuth = $hybridAuth;
         $this->authorizedUser = $authorizedUser;
         $this->options = $options;
+        $this->repository = $repository;
     }
+
 
     public function run(JobEvent $event, $portalName='')
     {
