@@ -10,6 +10,7 @@
 /** */
 namespace YawikXingVendorApi\Listener;
 
+use Jobs\Entity\StatusInterface;
 use Jobs\Listener\Events\JobEvent;
 use Jobs\Listener\Response\JobResponse;
 use YawikXingVendorApi\Http\XingClient;
@@ -99,20 +100,27 @@ class PublisherWorker implements LoggerAwareInterface
             return new JobResponse($portalName, JobResponse::RESPONSE_ERROR, 'Authentication failed');
         }
 
-        //$api = $adapter->api();
-        //$baseUrl = str_replace('/v1', '', $api->api_base_url);
-        //$body = Json::encode($data);
-        //$response = $api->post($baseUrl . 'vendor/jobs/postings', $data, null, null, /*multipart*/ true);
-
         $jobData = $this->repository->findOrCreate($job->getId());
-        $logger && $logger->info('--> Sending ...');
+        $action = 'INSERT';
+        $postingId = $jobData->getPostingId();
+        if ($postingId) {
+            if (StatusInterface::INACTIVE == $job->getStatus()->getName()) {
+                $action = 'DELETE';
+            } else {
+                $action = 'UPDATE';
+            }
+        }
+        $logger && $logger->info('--> Sending ' . $action . ' request ...');
         $consumerKeys = $adapter->config['keys'];
         $tokens      = $adapter->getAccessToken();
-        $response = $this->sendJob($data, $consumerKeys, $tokens);
+        $response = $this->sendJob($data, $consumerKeys, $tokens, $action, $postingId);
         //$client = new XingClient();
         //$response = $client->sendJob($data, $consumerKeys, $tokens);
 
         $jobData->addResponse($response['code'], $response['body']);
+        if ('DELETE' == $action && (200 == (int) $response['code'] || 201 == (int) $response['code'])) {
+            $jobData->setPostingId('');
+        }
         $this->repository->store($jobData);
 
         switch($response['code']){
@@ -193,16 +201,16 @@ class PublisherWorker implements LoggerAwareInterface
          * MAX 10000 characters.
          */
 
-        $logger->info('---> Fetch description from ' . $job->getLink());
+        $logger && $logger->info('---> Fetch description from ' . $job->getLink());
         $description = @file_get_contents($job->getLink());
 
-        if (!$description) {
-            $description = $extra['description'];
+        if (false === $description) {
+            $description = isset($extra['description']) ? $extra['description'] : $job->getTemplateValues()->getDescription();
 
-            $logger->notice('----> No description recieved. Fall back to transmitted description.');
+            $logger && $logger->notice('----> No description recieved. Fall back to transmitted description.');
         }
 
-        $parameter['description'] = $description ?: $extra['description'];
+        $parameter['description'] = $description;
 
         /*
          * function (required)
@@ -499,7 +507,7 @@ class PublisherWorker implements LoggerAwareInterface
      *
      * @return array
      */
-    protected function sendJob($data, $consumerKeys, $tokens)
+    protected function sendJob($data, $consumerKeys, $tokens, $action, $postingId = null)
     {
         $ch = curl_init();
         //$data = array_map('urlencode', $data);
@@ -515,14 +523,21 @@ class PublisherWorker implements LoggerAwareInterface
         $options = implode('&', $options);
         $api_base='https://api.xing.com/vendor/jobs/postings';
 
+        if ('INSERT' == $action) {
+            curl_setopt($ch, CURLOPT_POST, true);
+        } else {
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE' == $action ? 'DELETE' : 'PUT');
+            $api_base .= '/' . $postingId;
+        }
+
         curl_setopt($ch, CURLOPT_URL, $api_base);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $options);
-        curl_setopt($ch, CURLOPT_POST, true);
+
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
         $body = curl_exec($ch);
         $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        return ['code' => $code, 'body' => $body];
+        return [ 'code' => $code, 'body' => $body ];
 
     }
 }
