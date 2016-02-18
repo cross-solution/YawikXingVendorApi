@@ -118,27 +118,24 @@ class PublisherWorker implements LoggerAwareInterface
         //$response = $client->sendJob($data, $consumerKeys, $tokens);
 
         $jobData->addResponse($response['code'], $response['body']);
-        if ('DELETE' == $action && (200 == (int) $response['code'] || 201 == (int) $response['code'])) {
+        $isSuccess =  200 <= (int) $response['code'] && 300 > (int) $response['code'];
+
+        if ('DELETE' == $action && $isSuccess) {
             $jobData->setPostingId('');
         }
         $this->repository->store($jobData);
 
-        switch($response['code']){
-            case 200:
-            case 201:
+        if ($isSuccess) {
                 $logger->info('==> Success!');
                 $logger->debug(var_export($response['body'], true));
-                break;
-            default:
+                return new JobResponse($portalName, JobResponse::RESPONSE_OK, 'Response: ' . var_export($response['body'], true));
+        } else {
                 $logger->err(sprintf(
                                  '==> Sending failed: [%s] %s',
                                  $response['code'], $response['body']
                              ));
                 return new JobResponse($portalName, JobResponse::RESPONSE_FAIL, false);
-
         }
-
-        return new JobResponse($portalName, JobResponse::RESPONSE_OK, 'Response: ' . var_export($response['body'], true));
     }
 
     /**
