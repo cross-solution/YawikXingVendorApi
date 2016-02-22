@@ -158,6 +158,10 @@ class PublisherWorker implements LoggerAwareInterface
                   ? $extra['channels']['XingVendorApi']['xing']
                   : array('company' => '', 'personal' => '');
 
+        $jobLink = isset($extra['channels']['XingVendorApi']['link'])
+            ? $extra['channels']['XingVendorApi']['link']
+            : $job->getLink();
+
         $parameter = array();
         // check for category_id (required) and subcategory_id (optional)
 #        $parameter['category_id'] = $categoryJob->getCategory(isset($extra['branches']) ? $extra['branches'] : []);
@@ -198,8 +202,8 @@ class PublisherWorker implements LoggerAwareInterface
          * MAX 10000 characters.
          */
 
-        $logger && $logger->info('---> Fetch description from ' . $job->getLink());
-        $description = @file_get_contents($job->getLink());
+        $logger && $logger->info('---> Fetch description from ' . $jobLink);
+        $description = @file_get_contents($jobLink);
 
         if (false === $description) {
             $description = isset($extra['description']) ? $extra['description'] : $job->getTemplateValues()->getDescription();
@@ -366,7 +370,8 @@ class PublisherWorker implements LoggerAwareInterface
          * this posting the field should contain the url to the profile on XING.
          * For example https://www.xing.com/profiles/Max_Mustermann
          */
-        $parameter['poster_url'] = $xingData['personal'];
+        list($posterUrl, $trash) = explode('?', $xingData['personal'], 2);
+        $parameter['poster_url'] = $posterUrl;
 
         /*
          * posting_logo_content (optional)
@@ -390,7 +395,7 @@ class PublisherWorker implements LoggerAwareInterface
          * If your order allows to have your posting hosted on an external site, you can
          * set here the url. It should be a http address.
          */
-        $parameter['posting_url'] = $job->getLink();
+        $parameter['posting_url'] = $jobLink;
 
         /*
          * publish_to_company (optional)
@@ -526,6 +531,9 @@ class PublisherWorker implements LoggerAwareInterface
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE' == $action ? 'DELETE' : 'PUT');
             $api_base .= '/' . $postingId;
         }
+
+        $logger = $this->getLogger();
+        $logger && $logger->debug('Request: ' . $api_base . '; Options: ' . $options);
 
         curl_setopt($ch, CURLOPT_URL, $api_base);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $options);
