@@ -77,7 +77,7 @@ class Publisher implements LoggerAwareInterface
             $logger && $logger->notice('==> Skipped... Job is not activated for XING Export.')
                               ->info('--==--');
 
-            return new JobResponse($this->getName(), JobResponse::RESPONSE_DENIED, 'This portal is not activated for the job.');
+            return new JobResponse($this->getName(), JobResponse::RESPONSE_OK, 'This portal is not activated for the job.');
         }
 
         $worker   = call_user_func($this->createWorkerCallback);
