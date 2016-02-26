@@ -140,8 +140,8 @@ class JobData extends BaseEntity
 
     public function addResponse($code, $body)
     {
-        if (200 == (int) $code || 201 == (int) $code) {
-            $data = \Zend\Json\Json::decode($body, \Zend\Json\Json::TYPE_ARRAY);
+        if (200 <= (int) $code && 300 > (int) $code) {
+            $data = is_array($body) ? $body : \Zend\Json\Json::decode($body, \Zend\Json\Json::TYPE_ARRAY);
 
             if (isset($data['posting_id'])) {
                 $this->setPostingId($data['posting_id']);

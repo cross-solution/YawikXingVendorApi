@@ -67,15 +67,6 @@ class PublisherWorker implements LoggerAwareInterface
     {
         $logger = $this->getLogger();
 
-        $job = $event->getJobEntity();
-        $data = $this->collateXingData($job, $this->options, $event->getParam('extraData', []));
-
-
-        if (!$this->validateXingData($data)) {
-            $logger && $logger->err('==> Collated xing data is invalid.');
-
-            return new JobResponse($portalName, JobResponse::RESPONSE_ERROR, 'Invalid data.');
-        }
 
         if (!$this->authorizedUser) {
             $logger && $logger->err('==> No authorized user configured.');
@@ -100,39 +91,68 @@ class PublisherWorker implements LoggerAwareInterface
             return new JobResponse($portalName, JobResponse::RESPONSE_ERROR, 'Authentication failed');
         }
 
+        $job = $event->getJobEntity();
+        $jobStatus = $job->getStatus()->getName();
+
         $jobData = $this->repository->findOrCreate($job->getId());
         $action = 'INSERT';
         $postingId = $jobData->getPostingId();
+
+        if (!$postingId && StatusInterface::INACTIVE == $jobStatus) {
+            $logger && $logger->notice('==> Job was never transmitted to XING. but is INACTIVE. Skipping...');
+            return new JobResponse($portalName, JobResponse::RESPONSE_OK, 'Nothing do to, job is not active.');
+        }
+
+        if (!$postingId || StatusInterface::INACTIVE != $jobStatus) {
+
+            $data = $this->collateXingData($job, $this->options, $event->getParam('extraData', []));
+
+            if (!$this->validateXingData($data)) {
+                $logger && $logger->err('==> Collated xing data is invalid.');
+
+                return new JobResponse($portalName, JobResponse::RESPONSE_ERROR, 'Invalid data.');
+            }
+
+            $data = \Zend\Json\Json::encode($data);
+
+        } else {
+            $data = null;
+        }
+
+
         if ($postingId) {
-            if (StatusInterface::INACTIVE == $job->getStatus()->getName()) {
+            if (StatusInterface::INACTIVE == $jobStatus) {
                 $action = 'DELETE';
             } else {
                 $action = 'UPDATE';
             }
         }
+
         $logger && $logger->info('--> Sending ' . $action . ' request ...');
         $consumerKeys = $adapter->config['keys'];
         $tokens      = $adapter->getAccessToken();
-        $response = $this->sendJob($data, $consumerKeys, $tokens, $action, $postingId);
+        $responses = $this->sendJob($consumerKeys, $tokens, $action, $data, $postingId);
         //$client = new XingClient();
         //$response = $client->sendJob($data, $consumerKeys, $tokens);
 
-        $jobData->addResponse($response['code'], $response['body']);
-        $isSuccess =  200 <= (int) $response['code'] && 300 > (int) $response['code'];
+        $success = true;
+        foreach ($responses as $response) {
+            if (!$response['success']) { $success = false; }
+            $jobData->addResponse($response['code'], $response['data']);
+        }
 
-        if ('DELETE' == $action && $isSuccess) {
+        if ('DELETE' == $action && $success) {
             $jobData->setPostingId('');
         }
         $this->repository->store($jobData);
 
-        if ($isSuccess) {
+        if ($success) {
                 $logger->info('==> Success!');
-                $logger->debug(var_export($response['body'], true));
-                return new JobResponse($portalName, JobResponse::RESPONSE_OK, 'Response: ' . var_export($response['body'], true));
+                return new JobResponse($portalName, JobResponse::RESPONSE_OK, 'Xing-Api call was successfull');
         } else {
                 $logger->err(sprintf(
-                                 '==> Sending failed: [%s] %s',
-                                 $response['code'], $response['body']
+                                 '==> Sending failed; Responses: %s',
+                                 var_export($responses, true)
                              ));
                 return new JobResponse($portalName, JobResponse::RESPONSE_FAIL, false);
         }
@@ -509,40 +529,90 @@ class PublisherWorker implements LoggerAwareInterface
      *
      * @return array
      */
-    protected function sendJob($data, $consumerKeys, $tokens, $action, $postingId = null)
+    protected function sendJob($consumerKeys, $tokens, $action, $data = null, $postingId = null)
     {
-        $ch = curl_init();
-        //$data = array_map('urlencode', $data);
-        $dataJson = \Zend\Json\Json::encode($data);
 
-        $options = [
+        $logger = $this->getLogger();
+
+        $postFields = [
             'oauth_token=' . $tokens['access_token'],
             'oauth_consumer_key=' . $consumerKeys['key'],
             'oauth_signature_method=PLAINTEXT',
             'oauth_signature=' . $consumerKeys['secret'] . '%26' . $tokens['access_token_secret'],
-            $dataJson
         ];
-        $options = implode('&', $options);
-        $api_base='https://api.xing.com/vendor/jobs/postings';
+        $postFields = implode('&', $postFields);
+
 
         if ('INSERT' == $action) {
-            curl_setopt($ch, CURLOPT_POST, true);
+            $logger && $logger->info('---> POST job');
+            $insertResponse = $this->doApiCall('INSERT', $postFields . '&' . $data);
+
+            if (!$insertResponse['success']) { return [ $insertResponse ]; }
+
+            $logger && $logger->info('---> ACTIVATE job');
+            $response = $this->doApiCall('ACTIVATE', $postFields, $insertResponse['data']['posting_id']);
+
+            return [ $insertResponse, $response ];
+
+        } else if ('DELETE' == $action) {
+            $logger && $logger->info('---> DEACTIVATE job');
+            $response = $this->doApiCall('DEACTIVATE', $postFields, $postingId);
+
+            if (!$response['success']) { return [ $response ]; }
+
+            $logger && $logger->info('---> DELETE job');
+            $deleteResponse = $this->doApiCall('DELETE', $postFields, $postingId);
+
+            return [ $response, $deleteResponse ];
+
         } else {
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE' == $action ? 'DELETE' : 'PUT');
-            $api_base .= '/' . $postingId;
+            $logger && $logger->info('---> UPDATE job');
+            $response = $this->doApiCall('UPDATE', $postFields . '&' . $data, $postingId);
+
+            return [ $response ];
+
         }
 
-        $logger = $this->getLogger();
-        $logger && $logger->debug('Request: ' . $api_base . '; Options: ' . $options);
+    }
 
-        curl_setopt($ch, CURLOPT_URL, $api_base);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $options);
+    protected function doApiCall($action, $postFields, $postingId=null)
+    {
+        $url = 'https://api.xing.com/vendor/jobs/postings';
+        $ch = curl_init();
 
+        switch ($action) {
+            case 'INSERT':
+                curl_setopt($ch, CURLOPT_POST, true);
+                break;
+
+            case 'DELETE':
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+                $url .= '/' . $postingId;
+                break;
+
+            case 'UPDATE':
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+                $url .= '/' . $postingId;
+                break;
+
+            default:
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+                $url .= '/' . $postingId . '/' . strtolower($action);
+                break;
+        }
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        $logger = $this->getLogger();
+        $logger && $logger->debug('Api-Call: ' . $url . '; PostFields: ' . $postFields);
 
         $body = curl_exec($ch);
         $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        return [ 'code' => $code, 'body' => $body ];
 
+        return [ 'code' => $code, 'body' => $body,
+                 'data' => \Zend\Json\Json::decode($body),
+                 'success' => 200 <= (int) $code && 300 > (int) $code ];
     }
 }
