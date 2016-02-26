@@ -612,7 +612,7 @@ class PublisherWorker implements LoggerAwareInterface
         $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
         return [ 'code' => $code, 'body' => $body,
-                 'data' => \Zend\Json\Json::decode($body),
+                 'data' => \Zend\Json\Json::decode($body, \Zend\Json\Json::TYPE_ARRAY),
                  'success' => 200 <= (int) $code && 300 > (int) $code ];
     }
 }
