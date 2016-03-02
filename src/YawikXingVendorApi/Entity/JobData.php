@@ -47,6 +47,12 @@ class JobData extends BaseEntity
     protected $permalink;
 
     /**
+     * @ODM\Boolean
+     * @var boolean
+     */
+    protected $isActivated = false;
+
+    /**
      * Collection of API Responses
      *
      * @var Collection
@@ -112,6 +118,17 @@ class JobData extends BaseEntity
     public function getPostingId()
     {
         return $this->postingId;
+    }
+
+    public function isActivated($flag = null)
+    {
+        if (null === $flag) {
+            return $this->isActivated();
+        }
+
+        $this->isActivated = (bool) $flag;
+
+        return $this;
     }
 
     /**

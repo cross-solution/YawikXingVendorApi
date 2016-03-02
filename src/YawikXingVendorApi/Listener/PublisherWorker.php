@@ -113,7 +113,7 @@ class PublisherWorker implements LoggerAwareInterface
                 return new JobResponse($portalName, JobResponse::RESPONSE_ERROR, 'Invalid data.');
             }
 
-            $data = \Zend\Json\Json::encode($data);
+            //$data = \Zend\Json\Json::encode($data);
 
         } else {
             $data = null;
@@ -128,33 +128,90 @@ class PublisherWorker implements LoggerAwareInterface
             }
         }
 
-        $logger && $logger->info('--> Sending ' . $action . ' request ...');
+
         $consumerKeys = $adapter->config['keys'];
         $tokens      = $adapter->getAccessToken();
-        $responses = $this->sendJob($consumerKeys, $tokens, $action, $data, $postingId);
-        //$client = new XingClient();
-        //$response = $client->sendJob($data, $consumerKeys, $tokens);
+        $client = new XingClient($consumerKeys, $tokens, $logger);
 
-        $success = true;
-        foreach ($responses as $response) {
-            if (!$response['success']) { $success = false; }
+
+        if ('INSERT' == $action) {
+            $logger && $logger->info('--> Sending INSERT request ...');
+            $response = $client->sendJob($data);
+
+            if (!$response['success']) {
+                return $this->createResponse($response, $jobData, $portalName);
+            }
+
             $jobData->addResponse($response['code'], $response['data']);
+
+            $logger && $logger->info('--> Sending ACTIVATE request ...');
+            $response = $client->activateJob($response['data']['posting_id']);
+
+            if ($response['success']) {
+                $jobData->isActivated(true);
+            }
+
+            return $this->createResponse($response, $jobData, $portalName);
         }
 
-        if ('DELETE' == $action && $success) {
-            $jobData->setPostingId('');
+        if ('UPDATE' == $action) {
+            $logger && $logger->info('--> Sending UPDATE request ...');
+            $response = $client->sendJob($data, $postingId);
+
+            if (!$response['success']) {
+                return $this->createResponse($response, $jobData, $portalName);
+            }
+
+
+
+            if (!$jobData->isActivated()) {
+                $jobData->addResponse($response['code'], $response['data']);
+
+                $logger && $logger->info('--> Sending ACTIVATE request ...');
+                $response = $client->activateJob($response['data']['posting_id']);
+
+
+                if ($response['success']) {
+                    $jobData->isActivated(true);
+                }
+                return $this->createResponse($response, $jobData, $portalName);
+            }
+
+            return $this->createResponse($response, $jobData, $portalName);
         }
+
+        if ('DELETE' == $action) {
+            if ($jobData->isActivated()) {
+                $logger && $logger->info('--> Sending DEACTIVATE request ...');
+                $response = $client->deactivateJob($postingId);
+
+                if (!$response['success']) {
+                    return $this->createResponse($response, $jobData, $portalName);
+                }
+
+                $jobData->addResponse($response['code'], $response['data']);
+                $jobData->isActivated(false);
+            }
+            $logger && $logger->info('--> Sending DELETE request ...');
+            $response = $client->deleteJob($postingId);
+
+            return $this->createResponse($response, $jobData, $portalName);
+        }
+    }
+
+    protected function createResponse($xingResponse, $jobData, $portalName)
+    {
+        $logger = $this->getLogger();
+        $jobData->addResponse($xingResponse['code'], $xingResponse['data']);
         $this->repository->store($jobData);
 
-        if ($success) {
-                $logger->info('==> Success!');
-                return new JobResponse($portalName, JobResponse::RESPONSE_OK, 'Xing-Api call was successfull');
+        if ($xingResponse['success']) {
+            $logger && $logger->info('==> Success');
+            return new JobResponse($portalName, JobResponse::RESPONSE_OK, 'Xing-Api call was successfull');
+
         } else {
-                $logger->err(sprintf(
-                                 '==> Sending failed; Responses: %s',
-                                 var_export($responses, true)
-                             ));
-                return new JobResponse($portalName, JobResponse::RESPONSE_FAIL, false);
+            $logger && $logger->err(sprintf('==> Sending failed: Response: %s', var_export($xingResponse, true)));
+            return new JobResponse($portalName, JobResponse::RESPONSE_FAIL, false);
         }
     }
 
@@ -193,7 +250,15 @@ class PublisherWorker implements LoggerAwareInterface
          *
          * Part of the address of the Job-Posting - city.
          */
-        $parameter['city'] = $job->location;
+        /* @var $location \Jobs\Entity\LocationInterface */
+        $locations = $job->getLocations();
+        if (count($locations)) {
+            $location  = $locations->first();
+            $parameter['city'] = $location->getCity();
+        } else {
+            $logger && $logger->notice('--> No job locations found. Use fallback "location" field.');
+            $parameter['city'] = $job->getLocation();
+        }
 
         /*
          * company_name (required)
@@ -300,16 +365,6 @@ class PublisherWorker implements LoggerAwareInterface
         $parameter['organization_id'] = $options->getOrganizationId();
 
         /*
-         * point_of_contact_type (required)
-         *
-         * This field determines who can be contacted for more information about this job
-         * posting. Can be a String ‘user’ or ‘company’, accordingly the poster_url or
-         * company_profile_url must be set. Default is ‘user’. Set to ‘none’ if neither
-         * is available.
-         */
-        $parameter['point_of_contact_type'] = 'user';# $job->getContactEmail();
-
-        /*
          * reply_settings (required)
          *
          * Here you can set the how candidates can apply for this job offer. This is a
@@ -343,6 +398,40 @@ class PublisherWorker implements LoggerAwareInterface
          */
         $parameter['ba'] = false;
 
+        // Determine the "contact type"
+        if (isset($xingData['personal']) && '' !== trim($xingData['personal'])) {
+            $contactType = 'user';
+        } else if (isset($xingData['company']) && '' !== trim($xingData['company'])) {
+            $contactType = 'company';
+        } else {
+            $contactType = 'none';
+        }
+
+        /*
+         * point_of_contact_type (required)
+         *
+         * This field determines who can be contacted for more information about this job
+         * posting. Can be a String ‘user’ or ‘company’, accordingly the poster_url or
+         * company_profile_url must be set. Default is ‘user’. Set to ‘none’ if neither
+         * is available.
+         */
+        $parameter['point_of_contact_type'] = $contactType;
+
+        /*
+         * poster_url (optional)
+         *
+         * When point_of_contact_type set to user this should contain the url to the users
+         * profile.
+         *
+         * A note on poster url: To be able to assign a user who is the point of contact for
+         * this posting the field should contain the url to the profile on XING.
+         * For example https://www.xing.com/profiles/Max_Mustermann
+         */
+        if ('user' == $contactType) {
+            list($posterUrl, $trash) = explode('?', $xingData['personal'], 2);
+            $parameter['poster_url'] = $posterUrl;
+        }
+
         /*
          * company_profile_url (optional)
          *
@@ -353,7 +442,10 @@ class PublisherWorker implements LoggerAwareInterface
          * contact for this posting the field should contain the url to the Company
          * profile on XING. For example https://www.xing.com/company/xing
          */
-        $parameter['company_profile_url'] = $xingData['company'];
+        if (isset($xingData['company']) && '' !== trim($xingData['company'])) {
+            list($companyUrl, $trash) = explode('?', $xingData['company'], 2);
+            $parameter['company_profile_url'] = $companyUrl;
+        }
 
         /*
          * create_story_on_activation (optional)
@@ -379,19 +471,6 @@ class PublisherWorker implements LoggerAwareInterface
          * A free text job code. MAX 100 characters.
          */
         $parameter['job_code'] = '123';
-
-        /*
-         * poster_url (optional)
-         *
-         * When point_of_contact_type set to user this should contain the url to the users
-         * profile.
-         *
-         * A note on poster url: To be able to assign a user who is the point of contact for
-         * this posting the field should contain the url to the profile on XING.
-         * For example https://www.xing.com/profiles/Max_Mustermann
-         */
-        list($posterUrl, $trash) = explode('?', $xingData['personal'], 2);
-        $parameter['poster_url'] = $posterUrl;
 
         /*
          * posting_logo_content (optional)
@@ -520,99 +599,5 @@ class PublisherWorker implements LoggerAwareInterface
         }
 
         return $valid;
-    }
-
-    /**
-     * @param $data
-     * @param $consumerKeys
-     * @param $tokens
-     *
-     * @return array
-     */
-    protected function sendJob($consumerKeys, $tokens, $action, $data = null, $postingId = null)
-    {
-
-        $logger = $this->getLogger();
-
-        $postFields = [
-            'oauth_token=' . $tokens['access_token'],
-            'oauth_consumer_key=' . $consumerKeys['key'],
-            'oauth_signature_method=PLAINTEXT',
-            'oauth_signature=' . $consumerKeys['secret'] . '%26' . $tokens['access_token_secret'],
-        ];
-        $postFields = implode('&', $postFields);
-
-
-        if ('INSERT' == $action) {
-            $logger && $logger->info('---> POST job');
-            $insertResponse = $this->doApiCall('INSERT', $postFields . '&' . $data);
-
-            if (!$insertResponse['success']) { return [ $insertResponse ]; }
-
-            $logger && $logger->info('---> ACTIVATE job');
-            $response = $this->doApiCall('ACTIVATE', $postFields, $insertResponse['data']['posting_id']);
-
-            return [ $insertResponse, $response ];
-
-        } else if ('DELETE' == $action) {
-            $logger && $logger->info('---> DEACTIVATE job');
-            $response = $this->doApiCall('DEACTIVATE', $postFields, $postingId);
-
-            if (!$response['success']) { return [ $response ]; }
-
-            $logger && $logger->info('---> DELETE job');
-            $deleteResponse = $this->doApiCall('DELETE', $postFields, $postingId);
-
-            return [ $response, $deleteResponse ];
-
-        } else {
-            $logger && $logger->info('---> UPDATE job');
-            $response = $this->doApiCall('UPDATE', $postFields . '&' . $data, $postingId);
-
-            return [ $response ];
-
-        }
-
-    }
-
-    protected function doApiCall($action, $postFields, $postingId=null)
-    {
-        $url = 'https://api.xing.com/vendor/jobs/postings';
-        $ch = curl_init();
-
-        switch ($action) {
-            case 'INSERT':
-                curl_setopt($ch, CURLOPT_POST, true);
-                break;
-
-            case 'DELETE':
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
-                $url .= '/' . $postingId;
-                break;
-
-            case 'UPDATE':
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
-                $url .= '/' . $postingId;
-                break;
-
-            default:
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
-                $url .= '/' . $postingId . '/' . strtolower($action);
-                break;
-        }
-
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-        $logger = $this->getLogger();
-        $logger && $logger->debug('Api-Call: ' . $url . '; PostFields: ' . $postFields);
-
-        $body = curl_exec($ch);
-        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-        return [ 'code' => $code, 'body' => $body,
-                 'data' => \Zend\Json\Json::decode($body, \Zend\Json\Json::TYPE_ARRAY),
-                 'success' => 200 <= (int) $code && 300 > (int) $code ];
     }
 }

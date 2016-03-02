@@ -10,8 +10,6 @@
 /** */
 namespace YawikXingVendorApi\Http;
 
-use Traversable;
-use Zend\Http\Client;
 
 /**
  * ${CARET}
@@ -19,50 +17,92 @@ use Zend\Http\Client;
  * @author Mathias Gelhausen <gelhausen@cross-solution.de>
  * @todo write test 
  */
-class XingClient extends Client
+class XingClient
 {
-    public function __construct($uri = null, $options = null)
-    {
-        $this->config['ssltransport'] = 'tls';
-        $this->config['verifypeer'] = 'false';
-        $this->config['adapter'] = 'Zend\Http\Client\Adapter\Curl';
+    protected $postfields;
+    protected $urlBase = 'https://api.xing.com/vendor/jobs/postings';
+    protected $logger;
 
-        parent::__construct($uri, $options);
+    public function __construct($consumerKeys, $tokens, $logger = null)
+    {
+        $this->postfields = implode('&', [
+            'oauth_token=' . $tokens['access_token'],
+            'oauth_consumer_key=' . $consumerKeys['key'],
+            'oauth_signature_method=PLAINTEXT',
+            'oauth_signature=' . $consumerKeys['secret'] . '%26' . $tokens['access_token_secret'],
+        ]);
+
+        $this->logger = $logger;
     }
 
-    public function sendJob($parameters, $consumerKeys, $tokens)
+    public function getLogger()
     {
-        $oauthParameters = $this->getOauthParameters($consumerKeys, $tokens);
-        $postParameters  = array_merge($parameters, $oauthParameters);
-        $request = $this->getRequest();
-        $headers = $request->getHeaders();
+        return $this->logger;
+    }
 
-        $request->setUri('https://api.xing.com/vendor/jobs/postings');
-        $request->setMethod('POST');
-        $request->getPost()->fromArray($postParameters);
+    public function sendJob($data, $postingId=null)
+    {
+        $data = \Zend\Json\Json::encode($data);
+        $postfields = $this->postfields . '&' . $data;
+        $action = $postingId ? 'UPDATE' : 'INSERT';
 
-        if (!$headers->has('Accept')) {
-            $headers->addHeaderLine('Accept', 'application/json'); //'application/vnd.xing.jobs.v1+json');
+        return $this->request($action, $postfields, $postingId);
+    }
+
+    public function activateJob($postingId)
+    {
+        return $this->request('ACTIVATE', $this->postfields, $postingId);
+    }
+
+    public function deactivateJob($postingId)
+    {
+        return $this->request('DEACTIVATE', $this->postfields, $postingId);
+    }
+
+    public function deleteJob($postingId)
+    {
+        return $this->request('DELETE', $this->postfields, $postingId);
+    }
+
+
+    protected function request($action, $postFields, $postingId=null)
+    {
+        $url = $this->urlBase;
+        $ch = curl_init();
+
+        switch ($action) {
+            case 'INSERT':
+                curl_setopt($ch, CURLOPT_POST, true);
+                break;
+
+            case 'DELETE':
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+                $url .= '/' . $postingId;
+                break;
+
+            case 'UPDATE':
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+                $url .= '/' . $postingId;
+                break;
+
+            default:
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+                $url .= '/' . $postingId . '/' . strtolower($action);
+                break;
         }
 
-        return $this->send($request);
-    }
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-    protected function getOauthParameters($consumerKeys, $tokens)
-    {
-        //$nonce = md5(microtime() . (isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : ''));
+        $logger = $this->getLogger();
+        $logger && $logger->debug('Api-Call: ' . $url . '; PostFields: ' . $postFields);
 
-        $parameters = [
-        //    'oauth_version'   => '1.0',
-        //    'oauth_nonce'     => $nonce,
-        //    'ouath_timestamp' => time(),
-            'oauth_token' => $tokens['access_token'],
-            'oauth_consumer_key' => $consumerKeys['key'],
-            'oauth_signature_method' => 'PLAINTEXT',
-            'oauth_signature' => $consumerKeys['secret'] . '%26' . $tokens['access_token_secret']
+        $body = curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-        ];
-
-        return $parameters;
+        return [ 'code' => $code, 'body' => $body,
+                 'data' => \Zend\Json\Json::decode($body, \Zend\Json\Json::TYPE_ARRAY),
+                 'success' => 200 <= (int) $code && 300 > (int) $code ];
     }
 }
