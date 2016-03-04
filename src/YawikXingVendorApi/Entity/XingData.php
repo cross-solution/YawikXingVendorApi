@@ -56,7 +56,7 @@ class XingData
     protected $language;
     protected $level;
     protected $orderId;
-    protected $replySettings;
+    protected $replySetting;
     protected $organizationId;
     protected $pointOfContactType;
     protected $tags;
@@ -603,13 +603,13 @@ class XingData
     }
 
     /**
-     * @param mixed $replySettings
+     * @param mixed $replySetting
      *
      * @return self
      */
-    public function setReplySettings($replySettings)
+    public function setReplySetting($replySetting)
     {
-        $this->replySettings = $replySettings;
+        $this->replySetting = $replySetting;
 
         return $this;
     }
@@ -617,9 +617,9 @@ class XingData
     /**
      * @return mixed
      */
-    public function getReplySettings()
+    public function getReplySetting()
     {
-        return $this->replySettings;
+        return $this->replySetting;
     }
 
     /**

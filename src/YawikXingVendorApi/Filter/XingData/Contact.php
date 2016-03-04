@@ -37,6 +37,10 @@ class Contact implements FilterInterface
             ? $data['channels']['XingVendorApi']['xing']
             : array('company' => '', 'personal' => '');
 
+        $filter   = function($url) {
+            list ($url, $trash) = explode('?', $url, 2);
+            return trim($url);
+        };
         $validate = function($url) {
             return preg_match('~^https://www.xing.com/(?:profiles|company)/[^\? ]+$~', $url);
         };
@@ -46,23 +50,30 @@ class Contact implements FilterInterface
 
         // Determine the "contact type"
         $contactType = false; $return=[];
-        if (isset($profileData['personal']) && $validate($profileData['personal'])) {
-            $logger && $logger->info('----> Valid user profile found.');
+        if (isset($profileData['personal'])) {
+            $url = $filter($profileData['personal']);
+            if ($validate($url)) {
+                $logger && $logger->info('----> Valid user profile found.');
 
-            $contactType = XingData::POINT_OF_CONTACT_TYPE_USER;
-            $xingData->setPosterUrl($profileData['personal']);
+                $contactType = XingData::POINT_OF_CONTACT_TYPE_USER;
+                $xingData->setPosterUrl($url);
 
-            $return[] = 'User profile found. Use as contact type.';
+                $return[] = 'User profile found. Use as contact type.';
+                $xingData->setTellMeMore(true);
+            }
         }
 
-        if (isset($profileData['company']) && $validate($profileData['company'])) {
-            $logger && $logger->info('----> Valid company profile found.');
+        if (isset($profileData['company'])) {
+            $url = $filter($profileData['company']);
+            if ($validate($url)) {
+                $logger && $logger->info('----> Valid company profile found.');
 
-            $return[] = 'Company profile found.' . ($contactType ? '' : ' Use as contact type.');
-            $contactType = $contactType ?: XingData::POINT_OF_CONTACT_TYPE_COMPANY;
+                $return[] = 'Company profile found.' . ($contactType ? '' : ' Use as contact type.');
+                $contactType = $contactType ?: XingData::POINT_OF_CONTACT_TYPE_COMPANY;
 
-            $xingData->setCompanyProfileUrl($profileData['company']);
-
+                $xingData->setCompanyProfileUrl($url);
+                $xingData->setTellMeMore(false);
+            }
         }
 
         if (!$contactType) {
@@ -70,6 +81,7 @@ class Contact implements FilterInterface
 
             $return = 'No valid profiles found. Use contactType NONE.';
             $contactType = XingData::POINT_OF_CONTACT_TYPE_NONE;
+            $xingData->setTellMeMore(false);
         }
 
         $xingData->setPointOfContactType($contactType);

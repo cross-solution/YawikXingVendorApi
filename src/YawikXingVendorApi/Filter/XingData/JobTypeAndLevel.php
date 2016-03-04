@@ -516,23 +516,7 @@ class JobTypeAndLevel implements FilterInterface
                  ->setLevel('JOBLEVEL_2');
 
 
-/*
-         * level (required)
-         *
-         * The career level for the posting (Set per default to INTERN for student postings)
-         *
-         * JOBLEVEL_1	Student/Intern
-         * JOBLEVEL_2	Entry Level
-         * JOBLEVEL_3	Professional/Experienced
-         * JOBLEVEL_4	Manager (Manager/Supervisor)
-         * JOBLEVEL_5	Executive (VP, SVP, etc.)
-         * JOBLEVEL_6	Senior Executive (CEO, CFO, President)
-         *//*
-$parameter['level'] =  $categoryJob->getJobLevel($job->title);
-
-*/
-
-
+        return empty($return) ? true : $return;
 
     }
 

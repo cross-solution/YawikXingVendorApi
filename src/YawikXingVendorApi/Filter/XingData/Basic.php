@@ -38,7 +38,7 @@ class Basic implements FilterInterface
         $data = $value->getData();
         $logger = $value->getLogger();
         $return = [];
-        $companyName = $job->getOrganization()->getOrganizationName();
+        $companyName = $job->getOrganization()->getOrganizationName()->getName();
         if (!$companyName) {
             $logger && $logger->notice('---> Organization name not found. Using deprecated company field from job entity.');
             $companyName = $job->getCompany();
@@ -62,7 +62,7 @@ class Basic implements FilterInterface
                  ->setLanguage('de')
                  ->setOrderId($options->getOrderId())
                  ->setOrganizationId($options->getOrganizationId())
-                 ->setReplySettings(XingData::REPLY_SETTINGS_EMAIL)
+                 ->setReplySetting(XingData::REPLY_SETTINGS_EMAIL)
                  ->setKeywords(isset($data['keywords']) ? $data['keywords'] : '')
                  ->setUserRole(XingData::USER_ROLE_EMPLOYEE)
                  ->setBa(false)
