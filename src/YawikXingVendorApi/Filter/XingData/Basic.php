@@ -58,7 +58,7 @@ class Basic implements FilterInterface
                  ->setDisciplineId(1003)
                  ->setCountry('DE')
                  ->setFunction($job->getTitle())
-                 ->setIndustryId(12020)
+                 ->setIndustryId(120200)
                  ->setLanguage('de')
                  ->setOrderId($options->getOrderId())
                  ->setOrganizationId($options->getOrganizationId())

@@ -47,11 +47,14 @@ class Contact implements FilterInterface
 
         $logger = $value->getLogger();
         $logger && $logger->info('---> Determine contact type ...');
+        $logger && $logger->debug('profileData: ' . var_export($profileData, true));
 
         // Determine the "contact type"
         $contactType = false; $return=[];
         if (isset($profileData['personal'])) {
+            $logger && $logger->debug('Personal-Url: ' . $profileData['personal']);
             $url = $filter($profileData['personal']);
+            $logger && $logger->debug('Filtered Personal-Url: ' . $url);
             if ($validate($url)) {
                 $logger && $logger->info('----> Valid user profile found.');
 
@@ -64,7 +67,9 @@ class Contact implements FilterInterface
         }
 
         if (isset($profileData['company'])) {
+            $logger && $logger->debug('Company-Url: ' . $profileData['company']);
             $url = $filter($profileData['company']);
+            $logger && $logger->debug('Filtered Company-Url: ' . $url);
             if ($validate($url)) {
                 $logger && $logger->info('----> Valid company profile found.');
 
