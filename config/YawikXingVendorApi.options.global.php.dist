@@ -39,6 +39,9 @@ $options = [
 
     /*
      * XING order id. (968180 is for the sandbox)
+     * order_id: 968182 Professional Ad (Design Ad Url)
+     * order_id: 968181 Standard Ad (Logo Ad)
+     * order_id: 968180 Standard Ad (Social Job Ad Text)
      */
 //    'order_id' => 968180,
 

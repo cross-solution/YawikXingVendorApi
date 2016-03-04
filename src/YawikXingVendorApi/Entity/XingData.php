@@ -18,27 +18,92 @@ namespace YawikXingVendorApi\Entity;
  */
 class XingData 
 {
+    
+    const JOB_TYPE_PART_TIME = 'PART_TIME';
+    const JOB_TYPE_FULL_TIME = 'FULL_TIME';
+    const JOB_TYPE_CONTRACTOR = 'CONTRACTOR';
+    const JOB_TYPE_INTERN = 'INTERN';
+    const JOB_TYPE_SEASONAL = 'SEASONAL';
+    const JOB_TYPE_TEMPORARY = 'TEMPORARY';
+    const JOB_TYPE_VOLUNTARY = 'VOLUNTARY';
+
+    const POINT_OF_CONTACT_TYPE_USER = 'user';
+    const POINT_OF_CONTACT_TYPE_COMPANY = 'company';
+    const POINT_OF_CONTACT_TYPE_NONE = 'none';
+
+    const REPLY_SETTINGS_EMAIL = 'email';
+    const REPLY_SETTINGS_URL = 'url';
+    const REPLY_SETTINGS_PRIVATE_MESSAGE = 'private_message';
+
+    const USER_ROLE_EXTERNAL_RECRUITER = 'EXTERNAL_RECRUITER';
+    const USER_ROLE_HR_DEPARTMENT = 'HR_DEPARTMENT';
+    const USER_ROLE_MANAGER = 'MANAGER';
+    const USER_ROLE_EMPLOYEE = 'EMPLOYEE';
+    const USER_ROLE_HR_CONSULTANT = 'HR_CONSULTANT';
+
     /**
      * @var string
      */
     protected $city;
     protected $companyName;
+    protected $companyProfileUrl;
     protected $country;
     protected $description;
     protected $disciplineId;
     protected $function;
-    protected $industry;
+    protected $industryId;
     protected $jobType;
     protected $language;
     protected $level;
     protected $orderId;
+    protected $replySettings;
     protected $organizationId;
     protected $pointOfContactType;
     protected $tags;
     protected $userRole;
+    protected $ba;
+    protected $createStoryOnActivation;
+    protected $currency;
+    protected $jobCode;
+    protected $posterUrl;
+    protected $postingLogoContent;
+    protected $postingPdfContent;
+    protected $postingUrl;
+    protected $publishToCompany;
+    protected $region;
+    protected $replyEmail;
+    protected $replyUrl;
+    protected $salary;
+    protected $skills;
+    protected $street;
+    protected $studentClassification;
+    protected $tellMeMore;
+    protected $videoLink;
+    protected $zipcode;
+    protected $keywords;
 
     /**
-     * @param mixed $city
+     * @param mixed $ba
+     *
+     * @return self
+     */
+    public function setBa($ba)
+    {
+        $this->ba = (bool) $ba;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBa()
+    {
+        return $this->ba;
+    }
+
+    /**
+     * @param string $city
      *
      * @return self
      */
@@ -50,7 +115,7 @@ class XingData
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getCity()
     {
@@ -78,6 +143,26 @@ class XingData
     }
 
     /**
+     * @param mixed $companyProfileUrl
+     *
+     * @return self
+     */
+    public function setCompanyProfileUrl($companyProfileUrl)
+    {
+        $this->companyProfileUrl = $companyProfileUrl;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCompanyProfileUrl()
+    {
+        return $this->companyProfileUrl;
+    }
+
+    /**
      * @param mixed $country
      *
      * @return self
@@ -98,25 +183,44 @@ class XingData
     }
 
     /**
-     * @param string $disciplineId
+     * @param mixed $createStoryOnActivation
      *
      * @return self
      */
-    public function setDisciplineId($disciplineId)
+    public function setCreateStoryOnActivation($createStoryOnActivation)
     {
-        $this->disciplineId = $disciplineId;
+        $this->createStoryOnActivation = (bool) $createStoryOnActivation;
 
         return $this;
     }
 
     /**
-     * @return string
+     * @return mixed
      */
-    public function getDisciplineId()
+    public function getCreateStoryOnActivation()
     {
-        return $this->disciplineId;
+        return $this->createStoryOnActivation;
     }
 
+    /**
+     * @param mixed $currency
+     *
+     * @return self
+     */
+    public function setCurrency($currency)
+    {
+        $this->currency = $currency;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCurrency()
+    {
+        return $this->currency;
+    }
 
     /**
      * @param mixed $description
@@ -136,6 +240,26 @@ class XingData
     public function getDescription()
     {
         return $this->description;
+    }
+
+    /**
+     * @param mixed $disciplineId
+     *
+     * @return self
+     */
+    public function setDisciplineId($disciplineId)
+    {
+        $this->disciplineId = $disciplineId;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDisciplineId()
+    {
+        return $this->disciplineId;
     }
 
     /**
@@ -159,13 +283,13 @@ class XingData
     }
 
     /**
-     * @param mixed $industry
+     * @param mixed $industryId
      *
      * @return self
      */
-    public function setIndustry($industry)
+    public function setIndustryId($industryId)
     {
-        $this->industry = $industry;
+        $this->industryId = $industryId;
 
         return $this;
     }
@@ -173,9 +297,29 @@ class XingData
     /**
      * @return mixed
      */
-    public function getIndustry()
+    public function getIndustryId()
     {
-        return $this->industry;
+        return $this->industryId;
+    }
+
+    /**
+     * @param mixed $jobCode
+     *
+     * @return self
+     */
+    public function setJobCode($jobCode)
+    {
+        $this->jobCode = $jobCode;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getJobCode()
+    {
+        return $this->jobCode;
     }
 
     /**
@@ -196,6 +340,26 @@ class XingData
     public function getJobType()
     {
         return $this->jobType;
+    }
+
+    /**
+     * @param mixed $keywords
+     *
+     * @return self
+     */
+    public function setKeywords($keywords)
+    {
+        $this->keywords = $keywords;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getKeywords()
+    {
+        return $this->keywords;
     }
 
     /**
@@ -299,6 +463,266 @@ class XingData
     }
 
     /**
+     * @param mixed $posterUrl
+     *
+     * @return self
+     */
+    public function setPosterUrl($posterUrl)
+    {
+        $this->posterUrl = $posterUrl;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPosterUrl()
+    {
+        return $this->posterUrl;
+    }
+
+    /**
+     * @param mixed $postingLogoContent
+     *
+     * @return self
+     */
+    public function setPostingLogoContent($postingLogoContent)
+    {
+        $this->postingLogoContent = $postingLogoContent;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPostingLogoContent()
+    {
+        return $this->postingLogoContent;
+    }
+
+    /**
+     * @param mixed $postingPdfContent
+     *
+     * @return self
+     */
+    public function setPostingPdfContent($postingPdfContent)
+    {
+        $this->postingPdfContent = $postingPdfContent;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPostingPdfContent()
+    {
+        return $this->postingPdfContent;
+    }
+
+    /**
+     * @param mixed $postingUrl
+     *
+     * @return self
+     */
+    public function setPostingUrl($postingUrl)
+    {
+        $this->postingUrl = $postingUrl;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPostingUrl()
+    {
+        return $this->postingUrl;
+    }
+
+    /**
+     * @param mixed $publishToCompany
+     *
+     * @return self
+     */
+    public function setPublishToCompany($publishToCompany)
+    {
+        $this->publishToCompany = (bool) $publishToCompany;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPublishToCompany()
+    {
+        return $this->publishToCompany;
+    }
+
+    /**
+     * @param mixed $region
+     *
+     * @return self
+     */
+    public function setRegion($region)
+    {
+        $this->region = $region;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRegion()
+    {
+        return $this->region;
+    }
+
+    /**
+     * @param mixed $replyEmail
+     *
+     * @return self
+     */
+    public function setReplyEmail($replyEmail)
+    {
+        $this->replyEmail = $replyEmail;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getReplyEmail()
+    {
+        return $this->replyEmail;
+    }
+
+    /**
+     * @param mixed $replySettings
+     *
+     * @return self
+     */
+    public function setReplySettings($replySettings)
+    {
+        $this->replySettings = $replySettings;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getReplySettings()
+    {
+        return $this->replySettings;
+    }
+
+    /**
+     * @param mixed $replyUrl
+     *
+     * @return self
+     */
+    public function setReplyUrl($replyUrl)
+    {
+        $this->replyUrl = $replyUrl;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getReplyUrl()
+    {
+        return $this->replyUrl;
+    }
+
+    /**
+     * @param mixed $salary
+     *
+     * @return self
+     */
+    public function setSalary($salary)
+    {
+        $this->salary = $salary;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSalary()
+    {
+        return $this->salary;
+    }
+
+    /**
+     * @param mixed $skills
+     *
+     * @return self
+     */
+    public function setSkills($skills)
+    {
+        $this->skills = $skills;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSkills()
+    {
+        return $this->skills;
+    }
+
+    /**
+     * @param mixed $street
+     *
+     * @return self
+     */
+    public function setStreet($street)
+    {
+        $this->street = $street;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getStreet()
+    {
+        return $this->street;
+    }
+
+    /**
+     * @param mixed $studentClassification
+     *
+     * @return self
+     */
+    public function setStudentClassification($studentClassification)
+    {
+        $this->studentClassification = $studentClassification;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getStudentClassification()
+    {
+        return $this->studentClassification;
+    }
+
+    /**
      * @param mixed $tags
      *
      * @return self
@@ -316,6 +740,26 @@ class XingData
     public function getTags()
     {
         return $this->tags;
+    }
+
+    /**
+     * @param mixed $tellMeMore
+     *
+     * @return self
+     */
+    public function setTellMeMore($tellMeMore)
+    {
+        $this->tellMeMore = (bool) $tellMeMore;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTellMeMore()
+    {
+        return $this->tellMeMore;
     }
 
     /**
@@ -338,10 +782,52 @@ class XingData
         return $this->userRole;
     }
 
+    /**
+     * @param mixed $videoLink
+     *
+     * @return self
+     */
+    public function setVideoLink($videoLink)
+    {
+        $this->videoLink = $videoLink;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getVideoLink()
+    {
+        return $this->videoLink;
+    }
+
+    /**
+     * @param mixed $zipcode
+     *
+     * @return self
+     */
+    public function setZipcode($zipcode)
+    {
+        $this->zipcode = $zipcode;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getZipcode()
+    {
+        return $this->zipcode;
+    }
+
+
+
     public function toArray()
     {
         $return = [];
-        $transform = function($match) { return strtolower($match[0]) . '_'; };
+        $transform = function($match) { return strtolower('_' . $match[0]); };
 
         foreach (get_object_vars($this) as $name => $value) {
             $name = preg_replace_callback('~[A-Z]~', $transform, $name);
@@ -351,6 +837,13 @@ class XingData
         return $return;
     }
 
+    public function toJson()
+    {
+        $data = $this->toArray();
+        $json = \Zend\Json\Json::encode($data);
 
-    
+        return $json;
+    }
+
+
 }

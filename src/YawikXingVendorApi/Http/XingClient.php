@@ -10,6 +10,8 @@
 /** */
 namespace YawikXingVendorApi\Http;
 
+use YawikXingVendorApi\Entity\XingData;
+
 
 /**
  * ${CARET}
@@ -40,9 +42,9 @@ class XingClient
         return $this->logger;
     }
 
-    public function sendJob($data, $postingId=null)
+    public function sendJob(XingData $data, $postingId=null)
     {
-        $data = \Zend\Json\Json::encode($data);
+        $data = $data->toJson();
         $postfields = $this->postfields . '&' . $data;
         $action = $postingId ? 'UPDATE' : 'INSERT';
 
