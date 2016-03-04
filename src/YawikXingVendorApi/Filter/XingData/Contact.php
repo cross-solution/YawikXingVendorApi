@@ -42,7 +42,7 @@ class Contact implements FilterInterface
             return trim($url);
         };
         $validate = function($url) {
-            return preg_match('~^https://www.xing.com/(?:profiles|company)/[^\? ]+$~', $url);
+            return preg_match('~^https://www.xing.com/(?:profile|companies)/[^\? ]+$~', $url);
         };
 
         $logger = $value->getLogger();
