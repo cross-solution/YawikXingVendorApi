@@ -830,6 +830,7 @@ class XingData
         $transform = function($match) { return strtolower('_' . $match[0]); };
 
         foreach (get_object_vars($this) as $name => $value) {
+            if (null === $value) { continue; }
             $name = preg_replace_callback('~[A-Z]~', $transform, $name);
             $return[$name] = $value;
         }

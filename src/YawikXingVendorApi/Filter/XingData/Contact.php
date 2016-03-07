@@ -91,6 +91,16 @@ class Contact implements FilterInterface
 
         $xingData->setPointOfContactType($contactType);
 
+        if (XingData::REPLY_SETTINGS_EMAIL == $xingData->getReplySetting()
+            && !$xingData->getReplyEmail()
+        ) {
+            if (XingData::POINT_OF_CONTACT_TYPE_USER == $contactType) {
+                $xingData->setReplySetting(XingData::REPLY_SETTINGS_PRIVATE_MESSAGE);
+            } else {
+                $xingData->setReplySetting(XingData::REPLY_SETTINGS_URL);
+            }
+        }
+
         return $return;
     }
 }

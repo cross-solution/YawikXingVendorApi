@@ -103,8 +103,32 @@ class XingClient
         $body = curl_exec($ch);
         $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-        return [ 'code' => $code, 'body' => $body,
-                 'data' => \Zend\Json\Json::decode($body, \Zend\Json\Json::TYPE_ARRAY),
-                 'success' => 200 <= (int) $code && 300 > (int) $code ];
+        return $this->createResponse($code, $body);
+    }
+
+    /**
+     * @todo Make Response Object?
+     *
+     * @param $code
+     * @param $body
+     *
+     * @return array
+     */
+    protected function createResponse($code, $body)
+    {
+        if (0 === strpos($body, '{')) {
+            $data = \Zend\Json\Json::decode($body, \Zend\Json\Json::TYPE_ARRAY);
+        } else {
+            $data = [];
+        }
+
+        $success = 200 <= (int) $code && 300 > (int) $code;
+
+        return [
+            'code'    => $code,
+            'body'    => $body,
+            'data'    => $data,
+            'success' => $success,
+        ];
     }
 }

@@ -161,23 +161,18 @@ class PublisherWorker implements LoggerAwareInterface
             $logger && $logger->info('--> Sending UPDATE request ...');
             $response = $client->sendJob($data, $postingId);
 
-            if (!$response['success']) {
+            if (!$response['success'] || $jobData->isActivated()) {
                 return $this->createResponse($response, $jobData, $portalName);
             }
 
+            $jobData->addResponse($response['code'], $response['data']);
+
+            $logger && $logger->info('--> Sending ACTIVATE request ...');
+            $response = $client->activateJob($postingId);
 
 
-            if (!$jobData->isActivated()) {
-                $jobData->addResponse($response['code'], $response['data']);
-
-                $logger && $logger->info('--> Sending ACTIVATE request ...');
-                $response = $client->activateJob($response['data']['posting_id']);
-
-
-                if ($response['success']) {
-                    $jobData->isActivated(true);
-                }
-                return $this->createResponse($response, $jobData, $portalName);
+            if ($response['success']) {
+                $jobData->isActivated(true);
             }
 
             return $this->createResponse($response, $jobData, $portalName);
