@@ -60,7 +60,6 @@ class Basic implements FilterInterface
                  ->setFunction($job->getTitle())
                  ->setIndustryId(120200)
                  ->setLanguage('de')
-                 ->setOrderId($options->getOrderId())
                  ->setOrganizationId($options->getOrganizationId())
                  ->setReplySetting(XingData::REPLY_SETTINGS_EMAIL)
                  ->setReplyEmail($job->getContactEmail())

@@ -27,6 +27,7 @@ class XingDataFilterChain extends FilterChain
         parent::__construct($options);
 
         $this->attach(new XingData\Basic())
+             ->attach(new XingData\OrderId())
              ->attach(new XingData\City())
              ->attach(new XingData\Contact())
              ->attach(new XingData\Description())

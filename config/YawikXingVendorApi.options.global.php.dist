@@ -42,8 +42,21 @@ $options = [
      * order_id: 968182 Professional Ad (Design Ad Url)
      * order_id: 968181 Standard Ad (Logo Ad)
      * order_id: 968180 Standard Ad (Social Job Ad Text)
+     *
+     * Multiple values are allowed. The array is in the form
+     * key => orderId.
+     *
+     * the key labeled "DEFAULT" will be the default value obvisually.
      */
-//    'order_id' => 968180,
+//    'order_ids' => [
+            'DEFAULT' => 968180,
+     ],
+
+     /*
+      * Name of the key in the channels data array for the value
+      * of the order id key.
+      */
+//      'order_id_key' => 'xingOrderId',
 
     /*
      * XING organization id

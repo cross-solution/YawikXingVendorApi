@@ -123,7 +123,7 @@ class JobData extends BaseEntity
     public function isActivated($flag = null)
     {
         if (null === $flag) {
-            return $this->isActivated();
+            return $this->isActivated;
         }
 
         $this->isActivated = (bool) $flag;

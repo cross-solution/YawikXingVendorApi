@@ -60,6 +60,20 @@ class ModuleOptions extends AbstractOptions
      */
     protected $orderId = 968180;
 
+    protected $orderIds = [
+        'DEFAULT' => 968180,
+    ];
+
+    /**
+     * Name of the key in the channels extra data array to look
+     * for the name of the orderId key.
+     *
+     * @var string
+     */
+    protected $orderIdKey = 'xingOrderId';
+
+
+
     /**
      * Xing organization id
      *
@@ -76,7 +90,7 @@ class ModuleOptions extends AbstractOptions
      */
     public function setApiPreview($apiPreview)
     {
-        $this->apiPreview = $apiPreview;
+        $this->apiPreview = (bool) $apiPreview;
 
         return $this;
     }
@@ -151,12 +165,16 @@ class ModuleOptions extends AbstractOptions
      * Sets the XING order id.
      *
      * @param string $orderId
+     * @param string $key
      *
      * @return self
      */
-    public function setOrderId($orderId)
+    public function setOrderId($orderId, $key='DEFAULT')
     {
-        $this->orderId = $orderId;
+        if ('DEFAULT' == $key) {
+            $this->orderId = $orderId;
+        }
+        $this->orderIds[$key] = $orderId;
 
         return $this;
     }
@@ -164,11 +182,58 @@ class ModuleOptions extends AbstractOptions
     /**
      * Gets the XING order id.
      *
+     * @param string $key
+     *
      * @return string
      */
-    public function getOrderId()
+    public function getOrderId($key = 'DEFAULT')
     {
-        return $this->orderId;
+        return isset($this->orderIds[$key]) ? $this->orderIds[$key] : $this->orderId;
+    }
+
+    /**
+     * Sets the order ids.
+     *
+     * Takes in an array of the form "key" => orderId.
+     *
+     * @param array $orderIds
+     *
+     * @return self
+     */
+    public function setOrderIds(array $orderIds)
+    {
+        $this->orderIds = $orderIds;
+
+        if (isset($orderIds['DEFAULT'])) {
+            $this->orderId = $orderIds['DEFAULT'];
+        }
+
+        return $this;
+    }
+
+    public function getOrderIds()
+    {
+        return $this->orderIds;
+    }
+
+    /**
+     * @param string $orderIdKey
+     *
+     * @return self
+     */
+    public function setOrderIdKey($orderIdKey)
+    {
+        $this->orderIdKey = $orderIdKey;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOrderIdKey()
+    {
+        return $this->orderIdKey;
     }
 
     /**
