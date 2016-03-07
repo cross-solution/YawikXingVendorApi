@@ -38,8 +38,8 @@ class OrderId implements FilterInterface
         $data = $value->getData();
         $logger = $value->getLogger();
         $dataKey = $options->getOrderIdKey();
-        $orderIdKey = isset($data['YawikXingVendorApi'][$dataKey])
-                    ? $data['YawikXingVendorApi'][$dataKey] : 'DEFAULT';
+        $orderIdKey = isset($data['channels']['XingVendorApi'][$dataKey])
+                    ? $data['channels']['XingVendorApi'][$dataKey] : 'DEFAULT';
         $orderId = $options->getOrderId($orderIdKey);
 
         $logger && $logger->info('---> ' . sprintf(
