@@ -3,12 +3,22 @@
  * YAWIK
  * 
  * @filesource
- * @copyright (c) 2013-2015 Cross Solution (http://cross-solution.de)
+ * @copyright (c) 2013 - 2016 Cross Solution (http://cross-solution.de)
  * @license   MIT
  * @author    weitz@cross-solution.de
  */
 
 return array(
+
+    'doctrine' => array(
+        'driver' => array(
+            'odm_default' => array(
+                'drivers' => array(
+                    'YawikXingVendorApi\Entity' => 'annotation',
+                ),
+            ),
+        ),
+    ),
 
     'hybridauth' => [
         'XingVendorApi' => [

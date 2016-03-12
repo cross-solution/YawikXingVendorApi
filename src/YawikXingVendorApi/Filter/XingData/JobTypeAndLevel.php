@@ -3,23 +3,22 @@
  * YAWIK
  * 
  * @filesource
- * @copyright (c) 2013 - 2016 Cross Solution (http://cross-solution.de)
+ * @copyright (c) 2013-2015 Cross Solution (http://cross-solution.de)
  * @license   MIT
  * @author    weitz@cross-solution.de
  */
 
-namespace YawikXingVendorApi\Service;
+namespace YawikXingVendorApi\Filter\XingData;
 
-use Zend\Log\LoggerAwareTrait;
+use Zend\Filter\FilterInterface;
+
 
 /**
- * Class CategoryJob
- * @package YawikXingVendorApi\Service
- * @deprecated Replaced with \YawikXingVendorApi\Filter\XingData\JobTypeAndLevel
+ *
+ * @author Mathias Gelhausen <gelhausen@cross-solution.de>
  */
-class CategoryJob
+class JobTypeAndLevel implements FilterInterface
 {
-    use LoggerAwareTrait;
 
     /**
      * @var array
@@ -488,12 +487,37 @@ class CategoryJob
         'JOBLEVEL_6' => array('en' => 'Senior Executive / CEO / CFO / President)'),
     );
 
-    protected function log($message, $type = 'info')
+
+    /**
+     *
+     *
+     * @param \YawikXingVendorApi\Filter\XingFilterData $value
+     *
+     * @return bool|string|array
+     */
+    public function filter($value)
     {
-        if (isset($this->logger)) {
-            $this->logger->{$type}('----> ' . $message);
+
+        $logger = $value->getLogger();
+        $logger && $logger->info('---> Determine job type, level, and category ...');
+
+        $xingData = $value->getXingData();
+        $data = $value->getData();
+
+        $return = [];
+        $jobType = $this->getJobType(isset($data['position']) ? $data['position'] : '');
+        if (false === $jobType) {
+            $logger && $logger->notice('No xing jobtype found for: ' . var_export($data['position'], True) . '; Using "FULL_TIME"');
+            $jobType = 'FULL_TIME';
+            $return[] = 'No job type found. Used FULL_TIME';
         }
-        return $this;
+
+        $xingData->setJobType($jobType)
+                 ->setLevel('JOBLEVEL_2');
+
+
+        return empty($return) ? true : $return;
+
     }
 
     /**
@@ -564,14 +588,13 @@ class CategoryJob
      *
      * @return null|string
      */
-    public function getJobType($label)
+    protected function getJobType($label)
     {
         $code = $this->find($label, $this->job_type);
         if (!empty($code)) {
             return $code;
         }
-        $this->log('No xing jobtype found for: ' . var_export($label, True) . '; Using "FULL_TIME"', 'warn');
-        return 'FULL_TIME';
+        return false;
     }
 
     /**

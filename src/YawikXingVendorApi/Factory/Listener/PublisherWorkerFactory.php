@@ -4,7 +4,7 @@
  *
  * @filesource
  * @license MIT
- * @copyright  2013 - 2015 Cross Solution <http://cross-solution.de>
+ * @copyright  2013 - 2016 Cross Solution <http://cross-solution.de>
  */
   
 /** */
@@ -35,8 +35,24 @@ class PublisherWorkerFactory implements FactoryInterface
         $hybridAuth = $serviceLocator->get('HybridAuth');
         $users = $serviceLocator->get('repositories')->get('Auth/User');
         $user = $users->findByLogin($options->getAuthorizedUser());
+        $repositories = $serviceLocator->get('repositories');
+        $repository   = $repositories->get('YawikXingVendorApi/JobData');
 
-        $worker = new PublisherWorker($hybridAuth, $user, $options);
+        $worker = new PublisherWorker($hybridAuth, $user, $options, $repository);
+
+        $logLevel = $options->getLogLevel();
+
+        if (false !== $logLevel) {
+            $log = $serviceLocator->get('Log/YawikXingVendorApi/Publisher');
+
+            if (7 != $logLevel) {
+                foreach ($log->getWriters() as $writer) {
+                    $writer->addFilter($logLevel);
+                }
+            }
+
+            $worker->setLogger($log);
+        }
 
         return $worker;
     }

@@ -3,7 +3,7 @@
  * YAWIK
  * 
  * @filesource
- * @copyright (c) 2013-2015 Cross Solution (http://cross-solution.de)
+ * @copyright (c) 2013 - 2016 Cross Solution (http://cross-solution.de)
  * @license   MIT
  * @author    weitz@cross-solution.de
  */
@@ -20,7 +20,6 @@ use Zend\Log\LoggerAwareTrait;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
-// use
 
 /**
  * Job listener for triggering actions like sending mail notification
@@ -32,7 +31,14 @@ class Publisher implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
+    /**
+     * @var string
+     */
     protected $name = 'XingVendorApi';
+
+    /**
+     * @var
+     */
     protected $createWorkerCallback;
 
     public function __construct($createWorkerCallback)
@@ -50,6 +56,11 @@ class Publisher implements LoggerAwareInterface
         return $this->name;
     }
 
+    /**
+     * @param JobEvent $event
+     *
+     * @return JobResponse
+     */
     public function postJob(JobEvent $event)
     {
         $logger = $this->getLogger();
@@ -66,7 +77,7 @@ class Publisher implements LoggerAwareInterface
             $logger && $logger->notice('==> Skipped... Job is not activated for XING Export.')
                               ->info('--==--');
 
-            return new JobResponse($this->getName(), JobResponse::RESPONSE_DENIED, 'This portal is not activated for the job.');
+            return new JobResponse($this->getName(), JobResponse::RESPONSE_OK, 'This portal is not activated for the job.');
         }
 
         $worker   = call_user_func($this->createWorkerCallback);
