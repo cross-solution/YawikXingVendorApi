@@ -513,7 +513,7 @@ class JobTypeAndLevel implements FilterInterface
         }
 
         $xingData->setJobType($jobType)
-                 ->setLevel('JOBLEVEL_2');
+                 ->setLevel('JOBLEVEL_3');
 
 
         return empty($return) ? true : $return;
