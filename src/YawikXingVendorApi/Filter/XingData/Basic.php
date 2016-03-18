@@ -45,6 +45,10 @@ class Basic implements FilterInterface
             $return['companyName'] = 'Used company field from job entity.';
         }
 
+        $disciplineId = isset($data['channels']['XingVendorApi']['disciplineId'])
+                      ? $data['channels']['XingVendorApi']['disciplineId']
+                      : 1022;
+
         if (isset($data['channels']['XingVendorApi']['link'])) {
             $jobLink = $data['channels']['XingVendorApi']['link'];
         } else {
@@ -55,10 +59,10 @@ class Basic implements FilterInterface
 
         $xingData->setPostingUrl($jobLink)
                  ->setCompanyName($companyName)
-                 ->setDisciplineId(1003)
+                 ->setDisciplineId($disciplineId)
                  ->setCountry('DE')
                  ->setFunction($job->getTitle())
-                 ->setIndustryId(120200)
+                 ->setIndustryId(230000)
                  ->setLanguage('de')
                  ->setOrganizationId($options->getOrganizationId())
                  ->setReplySetting(XingData::REPLY_SETTINGS_EMAIL)
