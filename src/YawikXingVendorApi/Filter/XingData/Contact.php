@@ -74,9 +74,14 @@ class Contact implements FilterInterface
                 $logger && $logger->info('----> Valid company profile found.');
 
                 $return[] = 'Company profile found.' . ($contactType ? '' : ' Use as contact type.');
-                $contactType = $contactType ?: XingData::POINT_OF_CONTACT_TYPE_COMPANY;
+                if ('' != $xingData->getReplyEmail()) {
+                    $contactType = XingData::POINT_OF_CONTACT_TYPE_COMPANY;
+                } else {
+                    $contactType = XingData::POINT_OF_CONTACT_TYPE_USER;
+                }
 
                 $xingData->setCompanyProfileUrl($url);
+                $xingData->setPublishToCompany(true);
                 $xingData->setTellMeMore(false);
             }
         }
@@ -97,7 +102,7 @@ class Contact implements FilterInterface
             if (XingData::POINT_OF_CONTACT_TYPE_USER == $contactType) {
                 $xingData->setReplySetting(XingData::REPLY_SETTINGS_PRIVATE_MESSAGE);
             } else {
-                $xingData->setReplySetting(XingData::REPLY_SETTINGS_URL);
+                $xingData->setReplySetting(XingData::REPLY_SETTINGS_PRIVATE_MESSAGE);
             }
         }
 

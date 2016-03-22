@@ -50,6 +50,28 @@ class Description implements FilterInterface
         $logger && $logger->info('---> Fetch description from ' . $jobLink);
         $description = @file_get_contents($jobLink);
 
+        $dom = new \DOMDocument("1.0", "UTF-8");
+        libxml_use_internal_errors(true);
+        $dom->loadHTML($description);
+
+        // remove Javascript
+        $xpath = new \DOMXPath($dom);
+        $entries = $xpath->query('//script');
+
+        foreach ( $entries as $node) {
+            $node->parentNode->removeChild($node);
+        }
+
+        // remove inline styles
+        $xpath = new \DOMXPath($dom);
+        $entries = $xpath->query('//style');
+
+        foreach ( $entries as $node) {
+            $node->parentNode->removeChild($node);
+        }
+
+        $description = trim(html_entity_decode(strip_tags($dom->saveHtml(),'<h1><p><br><ul><li><ol>')));
+
         if (false === $description) {
             $data = $value->getData();
             $description = isset($data['description'])
