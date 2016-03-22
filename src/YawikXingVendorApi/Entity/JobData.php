@@ -30,18 +30,18 @@ class JobData extends BaseEntity
      * Id of the corresponding job
      *
      * @var string
-     * @ODM\String
+     * @ODM\Field(type="string")
      */
     protected $jobId;
 
     /**
-     * @ODM\String
+     * @ODM\Field(type="string")
      * @var string
      */
     protected $postingId;
 
     /**
-     * @ODM\String
+     * @ODM\Field(type="string")
      * @var string
      */
     protected $permalink;
