@@ -11,6 +11,8 @@
 namespace YawikXingVendorApi\Filter\XingData;
 
 use Zend\Filter\FilterInterface;
+use Zend\Filter\StripTags;
+use YawikXingVendorApi\Filter\XingFilterData;
 
 /**
  * ${CARET}
@@ -31,9 +33,11 @@ class Description implements FilterInterface
     {
         $xingData = $value->getXingData();
         $logger = $value->getLogger();
-        $jobLink = $xingData->getPostingUrl();
 
-        if (!$jobLink) {
+        $jobLink = $xingData->getPostingUrl();
+        $description = $xingData->getDescription();
+
+        if (!$jobLink && !$description) {
             $logger && $logger->warn('No posting url in the Xing data object. Cannot fetch description.');
             return 'Missing posting_url. Cannot fetch description.';
         }
@@ -47,8 +51,10 @@ class Description implements FilterInterface
         * MAX 10000 characters.
         */
 
-        $logger && $logger->info('---> Fetch description from ' . $jobLink);
-        $description = @file_get_contents($jobLink);
+        if (!$description) {
+            $logger && $logger->info('---> Fetch description from ' . $jobLink);
+            $description = @file_get_contents($jobLink);
+        }
 
         $dom = new \DOMDocument("1.0", "UTF-8");
         libxml_use_internal_errors(true);
@@ -70,7 +76,10 @@ class Description implements FilterInterface
             $node->parentNode->removeChild($node);
         }
 
-        $description = trim(html_entity_decode(strip_tags($dom->saveHtml(),'<h1><p><br><ul><li><ol>')));
+        $stripTags = new StripTags();
+        $stripTags->setTagsAllowed(['h1','p','br','li','ol','ul']);
+        $stripTags->setAttributesAllowed(array());
+        $description = trim(html_entity_decode($stripTags($dom->saveHTML())));
 
         if (false === $description) {
             $data = $value->getData();

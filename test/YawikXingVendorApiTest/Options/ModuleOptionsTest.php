@@ -8,7 +8,7 @@
  * @author    weitz@cross-solution.de
  */
 
-namespace YawikXingVendorApi\Options;
+namespace YawikXingVendorApiTest\Options;
 
 use YawikXingVendorApi\Options\ModuleOptions as Options;
 
