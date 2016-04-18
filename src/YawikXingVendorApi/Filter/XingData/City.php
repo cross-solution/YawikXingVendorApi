@@ -38,7 +38,7 @@ class City implements FilterInterface
          *
          * Part of the address of the Job-Posting - city.
          */
-        /* @var $location \Jobs\Entity\LocationInterface */
+        /* @var \Jobs\Entity\LocationInterface $location */
         $locations = $job->getLocations();
         if (count($locations)) {
             $location  = $locations->first();
