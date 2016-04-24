@@ -77,14 +77,16 @@ class DescriptionTest extends \PHPUnit_Framework_TestCase
 
         $xingData = new XingData();
         $xingData->setDescription('<p style="test">foobar</p>');
+        $xingFilterData1 = new XingFilterData($xingData, null, [] ,null, null);
 
-
-
-        $xingFilterData = new XingFilterData($xingData, null, [] ,null, null);
+        $xingData = new XingData();
+        $xingData->setDescription('<p style="test">foo % bar</p> replace % by entity');
+        $xingFilterData2 = new XingFilterData($xingData, null, [] ,null, null);
 
 
         return array(
-            [$xingFilterData,'<p>foobar</p>']
+            [$xingFilterData1,'<p>foobar</p>'],
+            [$xingFilterData2,'<p>foo &percnt; bar</p> replace &percnt; by entity'],
         );
     }
 }
