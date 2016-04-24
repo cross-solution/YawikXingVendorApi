@@ -80,6 +80,9 @@ class Description implements FilterInterface
         $stripTags->setTagsAllowed(['h1','p','br','li','ol','ul']);
         $stripTags->setAttributesAllowed(array());
         $description = trim(html_entity_decode($stripTags($dom->saveHTML())));
+        
+        // Xing does not accept a '%' sign. 
+        $description = preg_replace('/%/','&percnt;',$description);
 
         if (false === $description) {
             $data = $value->getData();
