@@ -39,10 +39,14 @@ class Contact implements FilterInterface
 
         $filter   = function($url) {
             list ($url, $trash) = explode('?', $url, 2);
+            if (0 !== strpos($url, 'https://')) {
+                $url = 'https://' . $url;
+            }
+            $url = str_replace('https://xing', 'https://www.xing', $url);
             return trim($url);
         };
         $validate = function($url) {
-            return preg_match('~^https://www.xing.com/(?:profile|companies)/[^\? ]+$~', $url);
+            return preg_match('~^https://www\.xing\.com/(?:profile|companies)/[^\? ]+$~', $url);
         };
 
         $logger = $value->getLogger();
@@ -88,7 +92,6 @@ class Contact implements FilterInterface
 
         if (!$contactType) {
             $logger && $logger->info('----> No valid profile urls found. Set contact type to NONE.');
-
             $return = 'No valid profiles found. Use contactType NONE.';
             $contactType = XingData::POINT_OF_CONTACT_TYPE_NONE;
             $xingData->setTellMeMore(false);
