@@ -40,25 +40,40 @@ class City implements FilterInterface
          */
         /* @var \Jobs\Entity\LocationInterface $location */
         $locations = $job->getLocations();
+        $locationFound = false;
         if (count($locations)) {
-            $location  = $locations->first();
-            $city = $location->getCity();
-            if ($city) {
-                $xingData->setCity($city);
 
-                return true;
+            $cities = [];
+
+            foreach ($locations as $loc) {
+                $city = $loc->getCity();
+                if (!$locationFound && $city) {
+                    $xingData->setCity($city);
+                    $locationFound = true;
+                } else {
+                    $cities[] = $city;
+                }
+            }
+
+            if (count($cities)) {
+                $tags = $xingData->getKeywords();
+                $tags = substr(implode(', ', $cities) . ', ' . $tags, 0, 250);
+                $xingData->setKeywords($tags);
             }
         }
 
-        $logger = $value->getLogger();
+        if (!$locationFound) {
+            $logger = $value->getLogger();
 
-        $logger && $logger->notice('---> No job locations found. Use fallback "location" field.');
-        list ($city, $trash) = explode(',', $job->getLocation(), 2);
+            $logger && $logger->notice('---> No job locations found. Use fallback "location" field.');
+            list ($city, $trash) = explode(',', $job->getLocation(), 2);
 
 
-        $xingData->setCity($city);
+            $xingData->setCity($city);
+            $locationFound = 'Used fallback location';
+        }
 
-        return 'Used fallback location.';
+        return $locationFound;
 
     }
 }
