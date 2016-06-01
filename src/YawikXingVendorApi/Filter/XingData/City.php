@@ -31,6 +31,7 @@ class City implements FilterInterface
     public function filter($value)
     {
         $xingData = $value->getXingData();
+        $logger = $value->getLogger();
         $job = $value->getJob();
 
         /*
@@ -44,14 +45,20 @@ class City implements FilterInterface
         if (count($locations)) {
 
             $cities = [];
+            $regions = [];
 
             foreach ($locations as $loc) {
+                /* @var \Jobs\Entity\Location $loc */
                 $city = $loc->getCity();
-                if (!$locationFound && $city) {
-                    $xingData->setCity($city);
-                    $locationFound = true;
-                } else {
-                    $cities[] = $city;
+                if ($city) {
+                    if (!$locationFound) {
+                        $xingData->setCity($city);
+                        $locationFound = true;
+                    } else {
+                        $cities[] = $city;
+                    }
+
+                    $regions[] = $loc->getPostalcode() . ' ' . $city;
                 }
             }
 
@@ -59,12 +66,19 @@ class City implements FilterInterface
                 $tags = $xingData->getKeywords();
                 $tags = substr(implode(', ', $cities) . ', ' . $tags, 0, 250);
                 $xingData->setKeywords($tags);
+                $logger && $logger->info('---> set Tags: ' . $tags);
+            }
+
+            if (count($regions)) {
+                $region = $xingData->getRegion();
+                $region .= ($region ? "$region, " : '')
+                         . substr(implode(', ', $regions), 0, 250);
+                $xingData->setRegion($region);
+                $logger && $logger->info('---> set Region: ' . $region);
             }
         }
 
         if (!$locationFound) {
-            $logger = $value->getLogger();
-
             $logger && $logger->notice('---> No job locations found. Use fallback "location" field.');
             list ($city, $trash) = explode(',', $job->getLocation(), 2);
 
