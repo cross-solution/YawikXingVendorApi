@@ -68,7 +68,7 @@ class Basic implements FilterInterface
                  ->setReplySetting(XingData::REPLY_SETTINGS_EMAIL)
                  ->setReplyEmail($job->getContactEmail())
                  ->setKeywords(isset($data['keywords']) ? substr(implode(',', $data['keywords']), 0, 250) : '')
-                 ->setUserRole(XingData::USER_ROLE_EMPLOYEE)
+                 ->setUserRole(XingData::USER_ROLE_HR_DEPARTMENT)
                  ->setBa(false)
                  ->setCreateStoryOnActivation(false)
                  ->setCurrency('EUR')

@@ -53,12 +53,13 @@ class City implements FilterInterface
                 if ($city) {
                     if (!$locationFound) {
                         $xingData->setCity($city);
+                        $xingData->setZipcode($loc->getPostalcode());
                         $locationFound = true;
                     } else {
                         $cities[] = $city;
                     }
 
-                    $regions[] = $loc->getPostalcode() . ' ' . $city;
+                    $regions[] =  $city;
                 }
             }
 
