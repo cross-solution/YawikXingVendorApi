@@ -10,6 +10,7 @@
 
 namespace YawikXingVendorApi\Filter\XingData;
 
+use YawikXingVendorApi\Entity\XingData;
 use Zend\Filter\FilterInterface;
 
 
@@ -546,7 +547,6 @@ class JobTypeAndLevel implements FilterInterface
                             $best = $code;
                             //$this->info('(lev)' . $leven . ':' . $elem . ' ' . $value);
                         }
-
                     }
                 }
             }
@@ -604,7 +604,7 @@ class JobTypeAndLevel implements FilterInterface
      */
     public function getJobLevel($label)
     {
-        return 'JOBLEVEL_2';
+        return XingData::JOB_LEVEL_PROFESSIONAL_EXPERIENCED;
     }
 
 }
