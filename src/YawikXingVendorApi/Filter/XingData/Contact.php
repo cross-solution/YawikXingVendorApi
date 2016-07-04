@@ -42,7 +42,11 @@ class Contact implements FilterInterface
             if (0 !== strpos($url, 'https://')) {
                 $url = 'https://' . $url;
             }
-            $url = str_replace('https://xing', 'https://www.xing', $url);
+            $url = str_replace(
+                ['https://xing',     '/profiles/'],
+                ['https://www.xing', '/profile/'],
+                $url
+            );
             return trim($url);
         };
         $validate = function($url) {
