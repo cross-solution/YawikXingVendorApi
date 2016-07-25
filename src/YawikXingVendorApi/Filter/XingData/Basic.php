@@ -49,6 +49,10 @@ class Basic implements FilterInterface
                       ? $data['channels']['XingVendorApi']['disciplineId']
                       : 1022;
 
+       $xingOpts = isset($data['channels']['XingVendorApi']['xing'])
+            ? $data['channels']['XingVendorApi']['xing']
+            : array('company' => '', 'personal' => '', 'industry' => 230000, 'job_level' => '');
+
         if (isset($data['channels']['XingVendorApi']['link'])) {
             $jobLink = $data['channels']['XingVendorApi']['link'];
         } else {
@@ -62,7 +66,7 @@ class Basic implements FilterInterface
                  ->setDisciplineId($disciplineId)
                  ->setCountry('DE')
                  ->setFunction($job->getTitle())
-                 ->setIndustryId(230000)
+                 ->setIndustryId(isset($xingOpts['industry']) ? $xingData['industry'] : 230000)
                  ->setLanguage('de')
                  ->setOrganizationId($options->getOrganizationId())
                  ->setReplySetting(XingData::REPLY_SETTINGS_EMAIL)
