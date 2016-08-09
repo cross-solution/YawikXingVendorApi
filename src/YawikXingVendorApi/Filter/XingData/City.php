@@ -52,7 +52,7 @@ class City implements FilterInterface
                 $city = $loc->getCity();
                 if ($city) {
                     if (!$locationFound) {
-                        $xingData->setCity($city);
+                        //$xingData->setCity($city);
                         $xingData->setZipcode($loc->getPostalcode());
                         $locationFound = true;
                     } else {
@@ -71,10 +71,13 @@ class City implements FilterInterface
             }
 
             if (count($regions)) {
+                $regionsStr = substr(implode(', ', $regions), 0, 250);
                 $region = $xingData->getRegion();
                 $region .= ($region ? "$region, " : '')
-                         . substr(implode(', ', $regions), 0, 250);
+                         . $regionsStr;
                 $xingData->setRegion($region);
+                $xingData->setCity($regionsStr);
+                $locationFound = true;
                 $logger && $logger->info('---> set Region: ' . $region);
             }
         }
