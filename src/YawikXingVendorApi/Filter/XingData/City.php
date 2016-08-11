@@ -31,8 +31,32 @@ class City implements FilterInterface
     public function filter($value)
     {
         $xingData = $value->getXingData();
+        $data = $value->getData();
+        $data = isset($data['channels']['XingVendorApi']) ? $data['channels']['XingVendorApi'] : [];
         $logger = $value->getLogger();
         $job = $value->getJob();
+
+        if (isset($data['xingCity'])) {
+            $xingData->setCity($data['xingCity']);
+            $tags = $xingData->getKeywords();
+            $tags = ('' == trim($tags) ? '' : ', ') . $data['xingCity'];
+            if (isset($data['xingZipCode'])) {
+                $zip = trim(array_pop(explode(',', $data['xingZipCode'], 2)));
+                $xingData->setZipcode($zip);
+                $tags .= ', ' . $data['xingZipCode'];
+            }
+            $tags = substr($tags, 0, 250);
+            $xingData->setKeywords($tags);
+
+            if ($logger) {
+                $logger->info('----> Use provided data...');
+                $logger->info('----> Set City: ' . $data['xingCity']);
+                $logger->info('----> Set ZipCode: ' . $xingData->getZipcode());
+                $logger->info('----> Set Tags: ' . $tags);
+            }
+
+            return true;
+        }
 
         /*
          * city (required)
