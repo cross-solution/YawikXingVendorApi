@@ -50,7 +50,7 @@ class Contact implements FilterInterface
             return trim($url);
         };
         $validate = function($url) {
-            return preg_match('~^https://www\.xing\.com/(?:profile|companies)/[^\? ]+$~', $url);
+            return preg_match('~^https://www\.xing\.com/(?:profile|compan(?:y|ies))/[^\? ]+$~', $url);
         };
 
         $logger = $value->getLogger();
