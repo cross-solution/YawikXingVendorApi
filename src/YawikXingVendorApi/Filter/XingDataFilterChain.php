@@ -31,7 +31,8 @@ class XingDataFilterChain extends FilterChain
              ->attach(new XingData\City())
              ->attach(new XingData\Contact())
              ->attach(new XingData\Description())
-             ->attach(new XingData\JobTypeAndLevel());
+             ->attach(new XingData\JobTypeAndLevel())
+             ->attach(new XingData\Salary());
 
     }
 

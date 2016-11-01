@@ -48,6 +48,11 @@ class XingData
     const JOB_LEVEL_EXECUTIVE = 'JOBLEVEL_5_VP_SVP';
     const JOB_LEVEL_CEO_CFO_PRESIDENT = 'JOBLEVEL_6';
 
+    const SALARY_INTERVAL_YEARLY = 'yearly';
+    const SALARY_INTERVAL_MONTHLY = 'monthly';
+    const SALARY_INTERVAL_WEEKLY = 'weekly';
+    const SALARY_INTERVAL_HOURLY = 'hourly';
+
     /**
      * @var string
      */
@@ -81,6 +86,9 @@ class XingData
     protected $replyEmail;
     protected $replyUrl;
     protected $salary;
+    protected $salaryInterval;
+    protected $salaryRangeStart;
+    protected $salaryRangeEnd;
     protected $skills;
     protected $street;
     protected $studentClassification;
@@ -656,9 +664,17 @@ class XingData
      */
     public function setSalary($salary)
     {
-        $this->salary = $salary;
+        $this->salary = $this->filterSalary($salary);;
 
         return $this;
+    }
+
+    protected function filterSalary($salary)
+    {
+        $salary = str_replace(',', '.', $salary);
+        $salary = (float) $salary;
+
+        return 0 >= $salary ? null : $salary;
     }
 
     /**
@@ -668,6 +684,76 @@ class XingData
     {
         return $this->salary;
     }
+
+    /**
+     * @param mixed $salaryInterval
+     *
+     * @return self
+     */
+    public function setSalaryInterval($salaryInterval)
+    {
+        if (!in_array($salaryInterval, [self::SALARY_INTERVAL_HOURLY, self::SALARY_INTERVAL_MONTHLY, self::SALARY_INTERVAL_WEEKLY, self::SALARY_INTERVAL_YEARLY])
+            || self::SALARY_INTERVAL_YEARLY == $salaryInterval
+        ) {
+            $salaryInterval = null;
+
+        }
+
+        $this->salaryInterval = $salaryInterval;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSalaryInterval()
+    {
+        return $this->salaryInterval ?: self::SALARY_INTERVAL_YEARLY;
+    }
+
+    /**
+     * @param mixed $salaryRangeEnd
+     *
+     * @return self
+     */
+    public function setSalaryRangeEnd($salaryRangeEnd)
+    {
+        $this->salaryRangeEnd = $this->filterSalary($salaryRangeEnd);
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSalaryRangeEnd()
+    {
+        return $this->salaryRangeEnd;
+    }
+
+    /**
+     * @param mixed $salaryRangeStart
+     *
+     * @return self
+     */
+    public function setSalaryRangeStart($salaryRangeStart)
+    {
+        $this->salaryRangeStart = $this->filterSalary($salaryRangeStart);
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSalaryRangeStart()
+    {
+        return $this->salaryRangeStart;
+    }
+
+
+
 
     /**
      * @param mixed $skills
