@@ -1,0 +1,23 @@
+{
+    "type": "yawik-module",
+    "name": "cross-solution/yawik-xing-vendor-api",
+    "description": "This module enables YAWIK to publish job posting to XING",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Carsten Bleek",
+            "email": "bleek@cross-solution.de"
+        },
+        {
+            "name": "Mathias Gelhausen",
+            "email": "gelhausen@cross-solution.de"   
+        },
+    ],
+    "keywords": [
+        "yawik", 
+	"multiposting"
+    ],
+    "require": {
+        "composer/installers": "*"
+    }
+}
