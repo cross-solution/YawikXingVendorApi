@@ -34,20 +34,32 @@ class Salary implements FilterInterface
     {
         $xingData = $value->getXingData();
         $data = $value->getData();
-        $options = isset($data['channels']['XingVendorApi']['xing'])
-            ? $data['channels']['XingVendorApi']['xing']
-            : array('salary' => 0, 'salary_interval' => 'yearly', 'salary_range_start' => 0, 'salary_range_end' => 0);
+        if (!isset($data['channels']['XingVendorApi']['xing'])) {
+            return true;
+        }
+
+        $options = array_merge(
+            array('salary' => 0, 'salary_interval' => 'yearly', 'salary_range_start' => 0, 'salary_range_end' => 0),
+            $data['channels']['XingVendorApi']['xing']
+        );
 
         $salary = (float) $options['salary'];
         $salaryInterval = (string) $options['salary_interval'];
         $salaryStart = (float) $options['salary_range_start'];
         $salaryEnd = (float) $options['salary_range_end'];
 
-        $xingData->setSalary($salary)
-                 ->setSalaryInterval($salaryInterval)
-                 ->setSalaryRangeStart($salaryStart)
-                 ->setSalaryRangeEnd($salaryEnd)
-        ;
+        /*
+         * Xing allows either a salary range or a fixed salary. Not both together,
+         * so we need to decide what to submit...
+         */
+        if ($salaryEnd) {
+            $xingData->setSalaryRangeStart($salaryStart ?: $salary)
+                     ->setSalaryRangeEnd($salaryEnd);
+        } else if ($salary || $salaryStart) {
+            $xingData->setSalary($salary ?: $salaryStart);
+        }
+
+        $xingData->setSalaryInterval($salaryInterval);
 
         return true;
     }
