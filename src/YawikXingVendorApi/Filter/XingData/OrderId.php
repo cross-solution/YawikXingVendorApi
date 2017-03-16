@@ -49,8 +49,19 @@ class OrderId implements FilterInterface
 
         $xingData->setOrderId($orderId);
 
-        return "Use orderId $orderIdKey => $orderId";
-    }
+        $dataOrgIdKey = $options->getOrganizationIdKey();
+        $orgIdKey = isset($data['channels']['XingVendorApi'][$dataOrgIdKey])
+            ? $data['channels']['XingVendorApi'][$dataOrgIdKey] : 'DEFAULT';
+        $orgId = $options->getOrganizationId($orgIdKey);
 
+        $logger && $logger->info('---> ' . sprintf(
+                'Found organizationId %d with dataKey "%s" and orgIdKey "%s"',
+                $orgId, $dataOrgIdKey, $orgIdKey
+            ));
+
+        $xingData->setOrganizationId($$orgId);
+
+        return "Use organizationId $orgIdKey => $orgId and orderId $orderIdKey => $orderId";
+    }
 
 }

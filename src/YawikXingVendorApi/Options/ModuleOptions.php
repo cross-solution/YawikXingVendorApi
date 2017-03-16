@@ -81,6 +81,10 @@ class ModuleOptions extends AbstractOptions
      */
     protected $organizationId;
 
+    protected $organizationIds = [];
+
+    protected $organizationIdKey = 'xingOrganizationId';
+
     /**
      * Sets the API Preview flag.
      *
@@ -237,15 +241,64 @@ class ModuleOptions extends AbstractOptions
     }
 
     /**
+     * @param array $organizationIds
+     *
+     * @return self
+     */
+    public function setOrganizationIds($organizationIds)
+    {
+        $this->organizationIds = $organizationIds;
+
+        if (isset($organizationIds['DEFAULT'])) {
+            $this->organizationId = $organizationIds['DEFAULT'];
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getOrganizationIds()
+    {
+        return $this->organizationIds;
+    }
+
+    /**
+     * @param string $organizationIdKey
+     *
+     * @return self
+     */
+    public function setOrganizationIdKey($organizationIdKey)
+    {
+        $this->organizationIdKey = $organizationIdKey;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOrganizationIdKey()
+    {
+        return $this->organizationIdKey;
+    }
+
+
+
+    /**
      * Sets the Xing organization id.
      *
      * @param int $organizationId
      *
      * @return self
      */
-    public function setOrganizationId($organizationId)
+    public function setOrganizationId($organizationId, $key = 'DEFAULT')
     {
-        $this->organizationId = $organizationId;
+        if ('DEFAULT' == $key) {
+            $this->organizationId = $organizationId;
+        }
+        $this->organizationIds[$key] = $organizationId;
 
         return $this;
     }
@@ -255,8 +308,8 @@ class ModuleOptions extends AbstractOptions
      *
      * @return int
      */
-    public function getOrganizationId()
+    public function getOrganizationId($key = 'DEFAULT')
     {
-        return $this->organizationId;
+        return isset($this->organizationIds[$key]) ? $this->organizationIds[$key] : $this->organizationId;
     }
 }

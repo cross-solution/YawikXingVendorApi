@@ -68,7 +68,6 @@ class Basic implements FilterInterface
                  ->setFunction($job->getTitle())
                  ->setIndustryId(isset($xingOpts['industry']) ? $xingOpts['industry'] : 230000)
                  ->setLanguage('de')
-                 ->setOrganizationId($options->getOrganizationId())
                  ->setReplySetting(XingData::REPLY_SETTINGS_EMAIL)
                  ->setReplyEmail($job->getContactEmail())
                  ->setKeywords(isset($data['keywords']) ? substr(implode(',', $data['keywords']), 0, 250) : '')

@@ -61,7 +61,18 @@ $options = [
     /*
      * XING organization id
      *
-//    'organization_id' => '',
+     * Multiple values are allowed. The array is in the form
+     * key => organizationId
+     *
+     * the key labeled "DEFAULT" will be the default value.
+     */
+//    'organization_ids' => [],
+
+    /*
+     * Name of the key in the channels data array for the value
+     * of  the organization id key.
+     */
+//      'organization_id_key' => 'xingOrganizationId';
 ];
 
 
