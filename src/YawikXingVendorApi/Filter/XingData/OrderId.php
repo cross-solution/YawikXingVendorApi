@@ -59,7 +59,7 @@ class OrderId implements FilterInterface
                 $orgId, $dataOrgIdKey, $orgIdKey
             ));
 
-        $xingData->setOrganizationId($$orgId);
+        $xingData->setOrganizationId($orgId);
 
         return "Use organizationId $orgIdKey => $orgId and orderId $orderIdKey => $orderId";
     }
