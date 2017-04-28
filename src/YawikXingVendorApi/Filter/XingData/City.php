@@ -39,13 +39,14 @@ class City implements FilterInterface
         if (isset($data['xingCity'])) {
             $xingData->setCity($data['xingCity']);
             $tags = $xingData->getKeywords();
-            $tags .= ('' == trim($tags) ? '' : ', ') . $data['xingCity'];
+            $tags = $data['xingCity'] . ('' == trim($tags) ? '' : ', ') . $tags;
+            $tags = substr($tags, 0, 250);
+
             if (isset($data['xingZipCode'])) {
                 $zip = trim(array_pop(explode(',', $data['xingZipCode'], 2)));
                 $xingData->setZipcode($zip);
-                $tags .= ', ' . $data['xingZipCode'];
             }
-            $tags = substr($tags, 0, 250);
+
             $xingData->setKeywords($tags);
 
             if ($logger) {
