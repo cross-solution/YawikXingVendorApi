@@ -44,6 +44,12 @@ class Basic implements FilterInterface
             $companyName = $job->getCompany();
             $return['companyName'] = 'Used company field from job entity.';
         }
+        if (100 < strlen($companyName)) {
+            $oldCompanyName = $companyName;
+            $companyName    = substr($companyName, 0, 100);
+            $logger && $logger->notice('---> Organization name is more then 100 characters long. Truncating "'
+                                       . $oldCompanyName . '" to "' . $companyName . '"');
+        }
 
         $disciplineId = isset($data['channels']['XingVendorApi']['disciplineId'])
                       ? $data['channels']['XingVendorApi']['disciplineId']
