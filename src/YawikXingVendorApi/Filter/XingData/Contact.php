@@ -103,7 +103,11 @@ class Contact implements FilterInterface
 
         $xingData->setPointOfContactType($contactType);
 
-        if (XingData::REPLY_SETTINGS_EMAIL == $xingData->getReplySetting()
+
+        if (isset($profileData['applyUrl'])) {
+            $xingData->setReplySetting(XingData::REPLY_SETTINGS_URL);
+            $xingData->setReplyUrl($profileData['applyUrl']);
+        } else if (XingData::REPLY_SETTINGS_EMAIL == $xingData->getReplySetting()
             && !$xingData->getReplyEmail()
         ) {
             if (XingData::POINT_OF_CONTACT_TYPE_USER == $contactType) {
