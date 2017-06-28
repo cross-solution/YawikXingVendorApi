@@ -38,22 +38,20 @@ class City implements FilterInterface
 
         if (isset($data['xingCity'])) {
             $xingData->setCity($data['xingCity']);
-            $tags = $xingData->getKeywords();
-            $tags = $data['xingCity'] . ('' == trim($tags) ? '' : ', ') . $tags;
-            $tags = substr($tags, 0, 250);
 
             if (isset($data['xingZipCode'])) {
                 $zip = trim(array_pop(explode(',', $data['xingZipCode'], 2)));
                 $xingData->setZipcode($zip);
             }
 
-            $xingData->setKeywords($tags);
+            $xingData->setKeywords($data['xingCity'], 'prepend');
 
             if ($logger) {
                 $logger->info('----> Use provided data...');
                 $logger->info('----> Set City: ' . $data['xingCity']);
                 $logger->info('----> Set ZipCode: ' . $xingData->getZipcode());
-                $logger->info('----> Set Tags: ' . $tags);
+                $logger->info('----> Prepend Tags: ' . $data['xingCity']);
+                $logger->info('----> New tags: ' . $xingData->getKeywords());
             }
 
             return true;
@@ -89,14 +87,13 @@ class City implements FilterInterface
             }
 
             if (count($cities)) {
-                $tags = $xingData->getKeywords();
-                $tags = substr(implode(', ', $cities) . ', ' . $tags, 0, 250);
-                $xingData->setKeywords($tags);
-                $logger && $logger->info('---> set Tags: ' . $tags);
+                $xingData->setKeywords($cities, 'prepend');
+                $logger && $logger->info('---> prepend Tags: ' . implode(',', $cities));
+                $logger && $logger->info('---> new tags:' . $xingData->getKeywords());
             }
 
             if (count($regions)) {
-                $regionsStr = substr(implode(', ', $regions), 0, 250);
+                $regionsStr = mb_substr(implode(', ', $regions), 0, 250, 'utf8');
                 $region = $xingData->getRegion();
                 $region .= ($region ? "$region, " : '')
                          . $regionsStr;

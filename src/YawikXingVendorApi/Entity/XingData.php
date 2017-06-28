@@ -362,8 +362,28 @@ class XingData
      *
      * @return self
      */
-    public function setKeywords($keywords)
+    public function setKeywords($keywords, $mode='replace')
     {
+        if (is_array($keywords)) {
+            $keywords = implode(',', $keywords);
+        }
+
+        switch ($mode) {
+            default:
+                break;
+
+            case "prepend":
+                $keywords .= ',' . $this->keywords;
+                break;
+
+            case "append":
+                $keywords = $this->keywords . ',' . $keywords;
+                break;
+
+        }
+
+        $keywords       = trim($keywords, ',');
+        $keywords       = mb_substr($keywords, 0, 250, 'utf8');
         $this->keywords = $keywords;
 
         return $this;

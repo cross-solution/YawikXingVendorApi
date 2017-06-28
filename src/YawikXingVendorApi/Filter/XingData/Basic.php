@@ -76,7 +76,7 @@ class Basic implements FilterInterface
                  ->setLanguage('de')
                  ->setReplySetting(XingData::REPLY_SETTINGS_EMAIL)
                  ->setReplyEmail($job->getContactEmail())
-                 ->setKeywords(isset($data['keywords']) ? mb_substr(implode(',', $data['keywords']), 0, 250, 'utf8') : '')
+                 ->setKeywords(isset($data['keywords']) ? $data['keywords'] : '')
                  ->setUserRole(isset($xingOpts['user_role']) ? $xingOpts['user_role'] : XingData::USER_ROLE_EMPLOYEE)
                  ->setBa(false)
                  ->setCreateStoryOnActivation(false)
