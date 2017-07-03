@@ -82,7 +82,7 @@ class Contact implements FilterInterface
                 $returnCompanyProfile = 'Company profile found.';
 
                 if (!$contactType) {
-                    if ('' != $xingData->getReplyEmail() || '' != $xingData->getReplyUrl()) {
+                    if ('' != $xingData->getReplyEmail() || '' != $profileData['applyUrl']) {
                         $returnCompanyProfile .= ' Use as contact.';
                         $contactType = XingData::POINT_OF_CONTACT_TYPE_COMPANY;
                     } else if ($xingData->getPosterUrl()) {
