@@ -79,14 +79,23 @@ class Contact implements FilterInterface
             $url = $filter($profileData['company']);
             $logger && $logger->debug('Filtered Company-Url: ' . $url);
             if ($validate($url)) {
-                $logger && $logger->info('----> Valid company profile found.');
+                $returnCompanyProfile = 'Company profile found.';
 
-                $return[] = 'Company profile found.' . ($contactType ? '' : ' Use as contact type.');
-                if ('' != $xingData->getReplyEmail()) {
-                    $contactType = XingData::POINT_OF_CONTACT_TYPE_COMPANY;
-                } else {
-                    $contactType = XingData::POINT_OF_CONTACT_TYPE_USER;
+                if (!$contactType) {
+                    if ('' != $xingData->getReplyEmail() || '' != $xingData->getReplyUrl()) {
+                        $returnCompanyProfile .= ' Use as contact.';
+                        $contactType = XingData::POINT_OF_CONTACT_TYPE_COMPANY;
+                    } else if ($xingData->getPosterUrl()) {
+                        $returnCompanyProfile .= 'But no replay email or reply url. Use contact_type: USER';
+                        $contactType = XingData::POINT_OF_CONTACT_TYPE_USER;
+                    } else {
+                        $returnCompanyProfile .= 'But no user profile, reply email or reply url set. Use contact_type: NONE';
+                        $contactType = XingData::POINT_OF_CONTACT_TYPE_NONE;
+                    }
                 }
+
+                $return[] = $returnCompanyProfile;
+                $logger && $logger->info('----> Valid ' . $returnCompanyProfile);
 
                 $xingData->setCompanyProfileUrl($url);
                 $xingData->setPublishToCompany(true);
