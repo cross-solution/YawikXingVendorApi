@@ -244,6 +244,7 @@ class XingData
      */
     public function setDescription($description)
     {
+        $description = mb_substr($description, 0, 7495, 'utf8');
         $this->description = $description;
 
         return $this;
