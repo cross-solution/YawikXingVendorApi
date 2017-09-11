@@ -56,15 +56,13 @@ class XingDataTest extends \PHPUnit_Framework_TestCase
              [ 'region','testValue' ], 
              [ 'replyEmail','testValue' ], 
              [ 'replyUrl','testValue' ], 
-             [ 'salary','testValue' ], 
-             [ 'skills','testValue' ], 
+             [ 'skills','testValue' ],
              [ 'street','testValue' ], 
              [ 'studentClassification','testValue' ], 
              [ 'tellMeMore','__bool__' ],
              [ 'videoLink','testValue' ], 
              [ 'zipcode','testValue' ], 
-             [ 'keywords','testValue' ], 
-
+             [ 'tags','testValue' ],
         ];
     }
 
@@ -95,6 +93,35 @@ class XingDataTest extends \PHPUnit_Framework_TestCase
         }
     }
 
+    public function testSetAndGetTags()
+    {
+        $target = new XingData();
+        $target->setTags('chunk');
+        $target->setTags('first');
+        $this->assertEquals('first', $target->getTags());
+
+        $target->setTags('second', 'append');
+        $this->assertEquals('first,second', $target->getTags());
+
+        $target->setTags(['third', 'fourth'], 'prepend');
+        $this->assertEquals('third,fourth,first,second', $target->getTags());
+
+    }
+
+    public function testSetAndGetSalary()
+    {
+        $target = new XingData();
+
+        $target->setSalary('nonumeric');
+        $this->assertNull($target->getSalary());
+
+        $target->setSalary('1,2');
+        $this->assertSame((float) '1.2', $target->getSalary());
+
+        $target->setSalary(3.4);
+        $this->assertSame(3.4, $target->getSalary());
+    }
+
     /**
      * @covers ::toArray()
      */
@@ -102,14 +129,6 @@ class XingDataTest extends \PHPUnit_Framework_TestCase
     {
         $target = new XingData();
 
-        foreach ($this->provideSetterAndGetterTestData() as $spec) {
-            $setter = "set" . $spec[0];
-            if ('__bool__' == $spec[1]) {
-                $target->$setter(true);
-            } else {
-                $target->$setter($spec[1]);
-            }
-        }
 
         $expected = [
             'city' => 'testValue',
@@ -141,15 +160,17 @@ class XingDataTest extends \PHPUnit_Framework_TestCase
             'region' => 'testValue',
             'reply_email' => 'testValue',
             'reply_url' => 'testValue',
-            'salary' => 'testValue',
+            'salary' => 1.2,
             'skills' => 'testValue',
             'street' => 'testValue',
             'student_classification' => 'testValue',
             'tell_me_more' => true,
             'video_link' => 'testValue',
             'zipcode' => 'testValue',
-            'keywords' => 'testValue',
+
         ];
+
+        foreach ($expected as $s => $v) { $s = str_replace('_', '', $s); $target->{"set$s"}($v); }
 
         $this->assertEquals($expected, $target->toArray());
     }
@@ -161,16 +182,9 @@ class XingDataTest extends \PHPUnit_Framework_TestCase
     {
         $target = new XingData();
 
-        foreach ($this->provideSetterAndGetterTestData() as $spec) {
-            $setter = "set" . $spec[0];
-            if ('__bool__' == $spec[1]) {
-                $target->$setter(true);
-            } else {
-                $target->$setter($spec[1]);
-            }
-        }
 
-        $expected = json_encode([
+
+        $expected = [
             'city' => 'testValue',
             'company_name' => 'testValue',
             'company_profile_url' => 'testValue',
@@ -200,16 +214,17 @@ class XingDataTest extends \PHPUnit_Framework_TestCase
             'region' => 'testValue',
             'reply_email' => 'testValue',
             'reply_url' => 'testValue',
-            'salary' => 'testValue',
+            'salary' => 1.2,
             'skills' => 'testValue',
             'street' => 'testValue',
             'student_classification' => 'testValue',
             'tell_me_more' => true,
             'video_link' => 'testValue',
             'zipcode' => 'testValue',
-            'keywords' => 'testValue',
-        ]);
 
-        $this->assertEquals($expected, $target->toJson());
+        ];
+        foreach ($expected as $s => $v) { $s = str_replace('_', '', $s); $target->{"set$s"}($v); }
+
+        $this->assertEquals(json_encode($expected), $target->toJson());
     }
 }

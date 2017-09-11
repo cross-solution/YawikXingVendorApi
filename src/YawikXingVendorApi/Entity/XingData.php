@@ -95,7 +95,6 @@ class XingData
     protected $tellMeMore;
     protected $videoLink;
     protected $zipcode;
-    protected $keywords;
 
     /**
      * @param mixed $ba
@@ -362,11 +361,26 @@ class XingData
      * @param mixed $keywords
      *
      * @return self
+     * @deprecated use setTags()
+     * @ignoreCodeCoverage
      */
     public function setKeywords($keywords, $mode='replace')
     {
-        if (is_array($keywords)) {
-            $keywords = implode(',', $keywords);
+        return $this->setTags($keywords, $mode);
+    }
+
+    /**
+     *
+     *
+     * @param array|string $tags
+     * @param string $mode
+     *
+     * @return self
+     */
+    public function setTags($tags, $mode='replace')
+    {
+        if (is_array($tags)) {
+            $tags = implode(',', $tags);
         }
 
         switch ($mode) {
@@ -374,28 +388,40 @@ class XingData
                 break;
 
             case "prepend":
-                $keywords .= ',' . $this->keywords;
+                $tags .= ',' . $this->tags;
                 break;
 
             case "append":
-                $keywords = $this->keywords . ',' . $keywords;
+                $tags = $this->tags . ',' . $tags;
                 break;
 
         }
 
-        $keywords       = trim($keywords, ',');
-        $keywords       = mb_substr($keywords, 0, 250, 'utf8');
-        $this->keywords = $keywords;
+        $tags       = trim($tags, ',');
+        $tags       = mb_substr($tags, 0, 498, 'utf8');
+        $this->tags = $tags;
 
         return $this;
     }
 
     /**
      * @return mixed
+     * @deprecated use getTags()
+     * @ignoreCodeCoverage
      */
     public function getKeywords()
     {
-        return $this->keywords;
+        return $this->getTags();
+    }
+
+    /**
+     *
+     *
+     * @return string
+     */
+    public function getTags()
+    {
+        return $this->tags;
     }
 
     /**
@@ -834,26 +860,6 @@ class XingData
     public function getStudentClassification()
     {
         return $this->studentClassification;
-    }
-
-    /**
-     * @param mixed $tags
-     *
-     * @return self
-     */
-    public function setTags($tags)
-    {
-        $this->tags = $tags;
-
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getTags()
-    {
-        return $this->tags;
     }
 
     /**

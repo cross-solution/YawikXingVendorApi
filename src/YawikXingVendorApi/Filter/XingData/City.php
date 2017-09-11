@@ -44,7 +44,7 @@ class City implements FilterInterface
                 $xingData->setZipcode($zip);
             }
 
-            $xingData->setKeywords($data['xingCity'], 'prepend');
+            $xingData->setTags($data['xingCity'], 'prepend');
 
             if ($logger) {
                 $logger->info('----> Use provided data...');
@@ -87,7 +87,7 @@ class City implements FilterInterface
             }
 
             if (count($cities)) {
-                $xingData->setKeywords($cities, 'prepend');
+                $xingData->setTags($cities, 'prepend');
                 $logger && $logger->info('---> prepend Tags: ' . implode(',', $cities));
                 $logger && $logger->info('---> new tags:' . $xingData->getKeywords());
             }
