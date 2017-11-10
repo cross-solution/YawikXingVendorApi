@@ -97,7 +97,8 @@ class XingClient
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HEADERFUNCTION, function($curl, $headerline) use ($responseHeaders) { $responseHeaders[] = $headerline; });
+        curl_setopt($ch, CURLOPT_HEADERFUNCTION, function($curl, $headerline) use (&$responseHeaders) {
+            $responseHeaders[] = trim($headerline); return strlen($headerline); });
 
         $logger = $this->getLogger();
         $logger && $logger->debug('Api-Call: ' . $url . '; PostFields: ' . $postFields);
