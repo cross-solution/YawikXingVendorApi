@@ -71,7 +71,6 @@ class Basic implements FilterInterface
                  ->setCompanyName($companyName)
                  ->setDisciplineId($disciplineId)
                  ->setCountry('DE')
-                 ->setFunction($job->getTitle())
                  ->setIndustryId(isset($xingOpts['industry']) ? $xingOpts['industry'] : 230000)
                  ->setLanguage('de')
                  ->setReplySetting(XingData::REPLY_SETTINGS_EMAIL)

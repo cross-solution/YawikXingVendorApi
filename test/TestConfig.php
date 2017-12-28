@@ -10,8 +10,9 @@
 
 return array(
     // This should be an array of module namespaces used in the application.
-    'modules' => array(
-        'Core', 'Auth', 'Jobs', 'YawikXingVendorApi'
+    'modules' => array_merge(
+            include_once __DIR__.'/../../../config/common.modules.php',
+            [ 'Core', 'Auth', 'Jobs', 'YawikXingVendorApi' ]
     ),
 
     // These are various options for the listeners attached to the ModuleManager

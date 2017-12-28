@@ -37,6 +37,10 @@ class Description implements FilterInterface
         $jobLink = $xingData->getPostingUrl();
         $description = $xingData->getDescription();
 
+        $title = $this->escapePercent($value->getJob()->getTitle());
+        $logger && $logger->info('---> Set title to "' . $title . '"');
+        $xingData->setFunction($title);
+
         if (!$jobLink && !$description) {
             $logger && $logger->warn('No posting url in the Xing data object. Cannot fetch description.');
             return 'Missing posting_url. Cannot fetch description.';
@@ -81,8 +85,6 @@ class Description implements FilterInterface
         $stripTags->setAttributesAllowed(array());
         $description = trim(html_entity_decode($stripTags($dom->saveHTML())));
         
-        // Xing does not accept a '%' sign. 
-        $description = preg_replace('/%/','&percnt;',$description);
 
         if (false === $description) {
             $data = $value->getData();
@@ -93,11 +95,18 @@ class Description implements FilterInterface
             $logger && $logger->notice('----> No description recieved. Fall back to transmitted description.');
             $return = 'Fetching description failed. Used transmitted description.';
         }
+        // Xing does not accept a '%' sign.
+        $description = $this->escapePercent($description);
+
 
         $xingData->setDescription($description);
 
         return $return;
     }
 
+    private function escapePercent($str)
+    {
+        return str_replace('%', '\u0025', $str);
+    }
 
 }

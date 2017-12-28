@@ -10,6 +10,7 @@
 /** */
 namespace YawikXingVendorApiTest\Filter\XingData;
 
+use Jobs\Entity\Job;
 use YawikXingVendorApi\Entity\XingData;
 use YawikXingVendorApi\Filter\XingData\Description;
 use YawikXingVendorApi\Filter\XingFilterData;
@@ -51,6 +52,19 @@ class DescriptionTest extends \PHPUnit_Framework_TestCase
     }
 
 
+    public function testSetJobTitleInXingData()
+    {
+        $job = new Job();
+        $job->setTitle('Test%Job');
+
+        $xingData = new XingData();
+        $xingFilterData = new XingFilterData($xingData, null, [], $job);
+
+        $this->filter->filter($xingFilterData);
+
+        $this->assertEquals('Test\u0025Job', $xingData->getFunction());
+    }
+
     /**
      * Tests if attributes are stripped.
      *
@@ -74,19 +88,21 @@ class DescriptionTest extends \PHPUnit_Framework_TestCase
      */
     public function provideHtml()
     {
+        $job = new Job();
+        $job->setTitle('TestJobTitle');
 
         $xingData = new XingData();
         $xingData->setDescription('<p style="test">foobar</p>');
-        $xingFilterData1 = new XingFilterData($xingData, null, [] ,null, null);
+        $xingFilterData1 = new XingFilterData($xingData, null, [] ,$job, null);
 
         $xingData = new XingData();
         $xingData->setDescription('<p style="test">foo % bar</p> replace % by entity');
-        $xingFilterData2 = new XingFilterData($xingData, null, [] ,null, null);
+        $xingFilterData2 = new XingFilterData($xingData, null, [] ,$job, null);
 
 
         return array(
             [$xingFilterData1,'<p>foobar</p>'],
-            [$xingFilterData2,'<p>foo &percnt; bar</p> replace &percnt; by entity'],
+            [$xingFilterData2,'<p>foo \u0025 bar</p> replace \u0025 by entity'],
         );
     }
 }
