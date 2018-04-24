@@ -36,6 +36,22 @@ class City implements FilterInterface
         $logger = $value->getLogger();
         $job = $value->getJob();
 
+        if (isset($data['xingLocation'])) {
+            $xingData->setCity($data['xingLocation']['city']);
+            $xingData->setTags($data['xingLocation']['city'], 'prepend');
+            $logger && $logger->info('----> Set City via "xingLocation": ' . $data['xingLocation']['city']);
+            if (isset($data['xingLocation']['postcode'])) {
+                $xingData->setZipcode($data['xingLocation']['postcode']);
+                $logger && $logger->info('----> Set ZipCode via "xingLocation": ' . $data['xingLocation']['postcode']);
+            }
+            if (isset($data['xingLocation']['country_code'])) {
+                $xingData->setCountry($data['xingLocation']['country_code']);
+                $logger && $logger->info('----> Set Country via "xingLocation": ' . $data['xingLocation']['country_code']);
+            }
+
+            return true;
+        }
+
         if (isset($data['xingCity'])) {
             $xingData->setCity($data['xingCity']);
 
