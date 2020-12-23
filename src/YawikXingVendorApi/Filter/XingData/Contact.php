@@ -6,7 +6,7 @@
  * @license MIT
  * @copyright  2013 - 2016 Cross Solution <http://cross-solution.de>
  */
-  
+
 /** */
 namespace YawikXingVendorApi\Filter\XingData;
 
@@ -15,9 +15,9 @@ use Zend\Filter\FilterInterface;
 
 /**
  * ${CARET}
- * 
+ *
  * @author Mathias Gelhausen <gelhausen@cross-solution.de>
- * @todo write test 
+ * @todo write test
  */
 class Contact implements FilterInterface
 {
@@ -50,7 +50,7 @@ class Contact implements FilterInterface
             return trim($url);
         };
         $validate = function($url) {
-            return preg_match('~^https://www\.xing\.com/(?:profile|compan(?:y|ies))/[^\? ]+$~', $url);
+            return preg_match('~^https://www\.xing\.com/(?:profile|pages|compan(?:y|ies))/[^\? ]+$~', $url);
         };
 
         $logger = $value->getLogger();
@@ -89,8 +89,8 @@ class Contact implements FilterInterface
                         $returnCompanyProfile .= 'But no replay email or reply url. Use contact_type: USER';
                         $contactType = XingData::POINT_OF_CONTACT_TYPE_USER;
                     } else {
-                        $returnCompanyProfile .= 'But no user profile, reply email or reply url set. Use contact_type: NONE';
-                        $contactType = XingData::POINT_OF_CONTACT_TYPE_NONE;
+                        $returnCompanyProfile .= 'But no user profile, reply email or reply url set. Use contact_type: COMPANY';
+                        $contactType = XingData::POINT_OF_CONTACT_TYPE_COMPANY;
                     }
                 }
 
