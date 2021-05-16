@@ -3,7 +3,7 @@ This YAWIK module pushes job opening via Vendor API to XING.
 Requirements
 ------------
 
-- A running YAWIK
+- A running [Yawik](https://yawik.org)
 - Xing Account for publishing jobs
 
 more infos:
@@ -13,7 +13,7 @@ https://www.helpify.de/xing-posting-api-en/2937/how-can-i-as-a-developer-use-the
 Installation
 ------------
 
-Checkout this repository into you modules directory of your YAWIK installation and enable the module by:
+Checkout this repository into your modules directory of your Yawik installation and enable the module by:
 
 <pre>
 cp modules/YawikXingVendorApi/config/YawikXingVendorApi.module.php.dist consfig/autoload/YawikXingVendorApi.module.php
@@ -22,13 +22,13 @@ cp modules/YawikXingVendorApi/config/YawikXingVendorApi.module.php.dist consfig/
 Or install the module using composer
 
 <pre>
-composer require cross-solution/yawik-company-registration
+composer require cross-solution/yawik-xing-vendor-api
 </pre>
 
 Licence 
 -------
 
-MIT
+[MIT](https://github.com/cross-solution/YawikXingVendorApi/blob/develop/LICENSE)
 
-https://github.com/cross-solution/YawikXingVendorApi/blob/develop/LICENSE
+
 
